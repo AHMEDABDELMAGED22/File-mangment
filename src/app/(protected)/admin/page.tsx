@@ -130,11 +130,14 @@ export default async function AdminPage() {
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             {(user as any).workspaces?.[0]?.id && (
-                              <Button asChild variant="ghost" size="sm" className="h-8 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
-                                <Link href={`/workspace/${(user as any).workspaces[0].id}`}>
-                                  <ExternalLink className="h-4 w-4 mr-2" />
-                                  View Files
-                                </Link>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                render={<Link href={`/workspace/${(user as any).workspaces[0].id}`} />}
+                              >
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                View Files
                               </Button>
                             )}
                             <ToggleActiveButton userId={user.id} isActive={user.is_active} />
