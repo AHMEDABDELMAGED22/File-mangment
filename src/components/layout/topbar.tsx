@@ -35,10 +35,10 @@ export function Topbar({ profile }: TopbarProps) {
           </SheetTrigger>
           <SheetContent side="left" className="w-64 bg-zinc-950 border-zinc-800 p-0">
             <div className="h-16 flex items-center gap-2 px-4 border-b border-zinc-800">
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
-                <Shield className="h-4 w-4 text-white" />
+              <div className="h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-zinc-800">
+                <img src="/logo.png" alt="AntiDrive Logo" className="h-full w-full object-cover" />
               </div>
-              <span className="text-lg font-semibold text-white">FileVault</span>
+              <span className="text-lg font-bold text-white">AntiDrive</span>
             </div>
             <nav className="py-4 px-2 space-y-1">
               {[

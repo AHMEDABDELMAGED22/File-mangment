@@ -82,6 +82,32 @@ export async function moveFileAction(formData: FormData) {
   }
 }
 
+export async function registerFileAction(
+  workspaceId: string,
+  folderId: string | null,
+  fileData: {
+    id: string;
+    name: string;
+    storage_path: string;
+    mime_type: string;
+    size_bytes: number;
+  }
+) {
+  const user = await requireAuth();
+  try {
+    const record = await fileService.registerFileMetadata(user.id, workspaceId, folderId, fileData);
+    await logActivity(workspaceId, user.id, ACTIONS.FILE_UPLOAD, TARGET_TYPES.FILE, record.id, { 
+      name: record.name, 
+      size: record.size_bytes,
+      method: "client-side" 
+    });
+    revalidatePath("/workspace");
+    return { success: true, file: record };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Registration failed" };
+  }
+}
+
 export async function downloadFileAction(fileId: string, isDownload = false) {
   await requireAuth();
   try {

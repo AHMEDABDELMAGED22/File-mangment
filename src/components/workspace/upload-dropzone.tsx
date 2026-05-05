@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Upload, Loader2 } from "lucide-react";
-import { uploadFileAction } from "@/actions/file.actions";
+import { registerFileAction } from "@/actions/file.actions";
 import { toast } from "sonner";
 import { MAX_FILE_SIZE } from "@/lib/constants";
 
@@ -22,21 +22,55 @@ export function UploadDropzone({ workspaceId, folderId, onUploadComplete }: Prop
     setUploading(true);
     setProgress([]);
 
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
+      toast.error("You must be logged in to upload files");
+      setUploading(false);
+      return;
+    }
+
     for (const file of acceptedFiles) {
       if (file.size > MAX_FILE_SIZE) {
         toast.error(`${file.name} exceeds ${MAX_FILE_SIZE / 1024 / 1024}MB limit`);
         continue;
       }
+      
       setProgress((p) => [...p, `Uploading ${file.name}...`]);
-      const formData = new FormData();
-      formData.set("workspace_id", workspaceId);
-      formData.set("folder_id", folderId || "");
-      formData.set("file", file);
-      const result = await uploadFileAction(formData);
-      if (result.error) {
-        toast.error(`Failed to upload ${file.name}: ${result.error}`);
-      } else {
+      
+      try {
+        const fileId = crypto.randomUUID();
+        const ext = file.name.split('.').pop();
+        // Sanitize name for storage (ASCII only)
+        const storageSafeName = file.name.replace(/[^\x00-\x7F]/g, "").replace(/\s+/g, "_");
+        const storagePath = `${user.id}/${fileId}_${storageSafeName}`;
+
+        // 1. Direct upload to Supabase Storage
+        const { error: uploadError } = await supabase.storage
+          .from("files")
+          .upload(storagePath, file, {
+            cacheControl: "3600",
+            upsert: false,
+          });
+
+        if (uploadError) throw uploadError;
+
+        // 2. Register metadata in DB via Server Action
+        const result = await registerFileAction(workspaceId, folderId || null, {
+          id: fileId,
+          name: file.name,
+          storage_path: storagePath,
+          mime_type: file.type || "application/octet-stream",
+          size_bytes: file.size,
+        });
+
+        if (result.error) throw new Error(result.error);
+        
         toast.success(`${file.name} uploaded successfully`);
+      } catch (err: any) {
+        toast.error(`Failed to upload ${file.name}: ${err.message}`);
       }
     }
 

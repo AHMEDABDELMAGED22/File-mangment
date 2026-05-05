@@ -38,12 +38,12 @@ export function Sidebar({ profile, workspaceId }: SidebarProps) {
       )}>
         {/* Logo */}
         <div className="h-16 flex items-center gap-2 px-4 border-b border-zinc-800">
-          <div className="h-8 w-8 shrink-0 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center">
-            <Shield className="h-4 w-4 text-white" />
+          <div className="h-8 w-8 shrink-0 overflow-hidden rounded-lg border border-zinc-800">
+            <img src="/logo.png" alt="AntiDrive Logo" className="h-full w-full object-cover" />
           </div>
           {!collapsed && (
-            <span className="text-lg font-semibold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
-              FileVault
+            <span className="text-lg font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent">
+              AntiDrive
             </span>
           )}
         </div>

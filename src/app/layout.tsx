@@ -8,8 +8,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "FileVault — Secure File Management",
-  description: "A secure multi-tenant file management platform. Upload, organize, and manage your files with confidence.",
+  title: "AntiDrive — Secure File Management",
+  description: "A secure multi-tenant file management platform. AntiDrive helps you upload, organize, and manage your files with confidence.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

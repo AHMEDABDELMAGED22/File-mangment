@@ -114,6 +114,42 @@ export async function uploadFile(
 }
 
 /**
+ * Register file metadata in the database (used for client-side uploads)
+ */
+export async function registerFileMetadata(
+  userId: string,
+  workspaceId: string,
+  folderId: string | null,
+  fileData: {
+    id: string;
+    name: string;
+    storage_path: string;
+    mime_type: string;
+    size_bytes: number;
+  }
+): Promise<FileRecord> {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("files")
+    .insert({
+      id: fileData.id,
+      workspace_id: workspaceId,
+      folder_id: folderId,
+      owner_id: userId,
+      name: fileData.name,
+      storage_path: fileData.storage_path,
+      mime_type: fileData.mime_type,
+      size_bytes: fileData.size_bytes,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(`Failed to save file metadata: ${error.message}`);
+  return data as FileRecord;
+}
+
+/**
  * Generate a signed download URL for a file
  */
 export async function getDownloadUrl(fileId: string, isDownload = false): Promise<string> {

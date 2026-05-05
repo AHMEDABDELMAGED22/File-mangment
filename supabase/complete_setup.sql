@@ -1,5 +1,5 @@
 -- =============================================
--- FileVault — Complete Database Setup
+-- AntiDrive — Complete Database Setup
 -- Run this entire script in the Supabase SQL Editor
 -- =============================================
 
