@@ -1,0 +1,102 @@
+"use client";
+
+import { useState } from "react";
+import { useFormStatus } from "react-dom";
+import { updateProfile, updatePassword } from "@/actions/auth.actions";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, Save, Lock } from "lucide-react";
+import { toast } from "sonner";
+
+function SaveBtn() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} className="bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white">
+      {pending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+      {pending ? "Saving..." : "Save Changes"}
+    </Button>
+  );
+}
+
+function PasswordBtn() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} className="bg-zinc-800 border border-zinc-700 text-zinc-300 hover:bg-zinc-700">
+      {pending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Lock className="h-4 w-4 mr-2" />}
+      {pending ? "Updating..." : "Update Password"}
+    </Button>
+  );
+}
+
+export default function SettingsPage() {
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+
+  async function handleProfile(formData: FormData) {
+    setProfileError(null);
+    const result = await updateProfile(formData);
+    if (result?.error) { setProfileError(result.error); toast.error(result.error); }
+    if (result?.success) toast.success(result.success);
+  }
+
+  async function handlePassword(formData: FormData) {
+    setPasswordError(null);
+    const result = await updatePassword(formData);
+    if (result?.error) { setPasswordError(result.error); toast.error(result.error); }
+    if (result?.success) toast.success(result.success);
+  }
+
+  return (
+    <div className="max-w-2xl space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-white">Settings</h1>
+        <p className="text-zinc-400 text-sm mt-1">Manage your account settings</p>
+      </div>
+
+      {/* Profile */}
+      <Card className="border-zinc-800 bg-zinc-900/50">
+        <CardHeader>
+          <CardTitle className="text-lg text-white">Profile</CardTitle>
+          <CardDescription className="text-zinc-400">Update your display name</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={handleProfile} className="space-y-4">
+            {profileError && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{profileError}</div>}
+            <div className="space-y-2">
+              <Label htmlFor="full_name" className="text-zinc-300">Full Name</Label>
+              <Input id="full_name" name="full_name" placeholder="Your name" required className="bg-zinc-800/50 border-zinc-700 text-white focus:border-violet-500" />
+            </div>
+            <SaveBtn />
+          </form>
+        </CardContent>
+      </Card>
+
+      <Separator className="bg-zinc-800" />
+
+      {/* Password */}
+      <Card className="border-zinc-800 bg-zinc-900/50">
+        <CardHeader>
+          <CardTitle className="text-lg text-white">Change Password</CardTitle>
+          <CardDescription className="text-zinc-400">Update your password</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={handlePassword} className="space-y-4">
+            {passwordError && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{passwordError}</div>}
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-zinc-300">New Password</Label>
+              <Input id="password" name="password" type="password" placeholder="••••••••" required minLength={6} className="bg-zinc-800/50 border-zinc-700 text-white focus:border-violet-500" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirm_password" className="text-zinc-300">Confirm Password</Label>
+              <Input id="confirm_password" name="confirm_password" type="password" placeholder="••••••••" required className="bg-zinc-800/50 border-zinc-700 text-white focus:border-violet-500" />
+            </div>
+            <PasswordBtn />
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

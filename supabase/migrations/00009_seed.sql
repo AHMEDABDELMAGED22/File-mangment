@@ -1,0 +1,20 @@
+-- =============================================
+-- Seed data for demo purposes
+-- =============================================
+-- NOTE: These users must be created via Supabase Auth first.
+-- After creating users in the Auth dashboard or via the API,
+-- the handle_new_user trigger will auto-create profiles and workspaces.
+--
+-- To create a demo admin, after the user signs up, run:
+--
+-- UPDATE public.profiles SET role = 'admin' WHERE id = '<admin-user-uuid>';
+--
+-- Example seed for testing (replace UUIDs with actual auth.users IDs):
+--
+-- -- Make a user an admin:
+-- -- UPDATE public.profiles SET role = 'admin' WHERE id = 'your-admin-user-id';
+--
+-- -- Create some demo folders:
+-- -- INSERT INTO public.folders (workspace_id, name) VALUES ('<workspace-id>', 'Documents');
+-- -- INSERT INTO public.folders (workspace_id, name) VALUES ('<workspace-id>', 'Images');
+-- -- INSERT INTO public.folders (workspace_id, name) VALUES ('<workspace-id>', 'Projects');
