@@ -3,9 +3,10 @@ import type { FileRecord, StorageUsage } from "@/lib/types";
 import { STORAGE_BUCKET, MAX_FILE_SIZE, BLOCKED_EXTENSIONS } from "@/lib/constants";
 
 /**
- * Sanitize a filename to prevent path traversal and invalid characters
+ * Sanitize a filename to prevent path traversal and invalid characters.
+ * If storageSafe is true, it removes all non-ASCII characters.
  */
-export function sanitizeFilename(filename: string): string {
+export function sanitizeFilename(filename: string, storageSafe = false): string {
   // Remove path separators and traversal patterns
   let sanitized = filename
     .replace(/\.\./g, "")
@@ -14,6 +15,18 @@ export function sanitizeFilename(filename: string): string {
     .replace(/[<>:"|?*\x00-\x1f]/g, "_")
     .trim();
 
+  if (storageSafe) {
+    // For storage paths, remove everything except English letters, numbers, dots, and underscores
+    sanitized = sanitized.replace(/[^\x00-\x7F]/g, "").replace(/\s+/g, "_");
+    
+    // Ensure we don't end up with an empty string if the whole filename was non-ASCII
+    const base = sanitized.split('.')[0];
+    const ext = sanitized.split('.').pop() || "";
+    if (!base || base === ext) {
+      sanitized = "file_" + Date.now() + (ext ? "." + ext : "");
+    }
+  }
+
   // Limit length
   if (sanitized.length > 255) {
     const ext = sanitized.split(".").pop() || "";
@@ -21,7 +34,7 @@ export function sanitizeFilename(filename: string): string {
   }
 
   // Ensure non-empty
-  if (!sanitized) {
+  if (!sanitized || sanitized === ".") {
     sanitized = "unnamed_file";
   }
 
@@ -60,9 +73,10 @@ export async function uploadFile(
   file: File
 ): Promise<FileRecord> {
   const supabase = await createClient();
-  const sanitizedName = sanitizeFilename(file.name);
+  const displayName = sanitizeFilename(file.name, false); // Keep non-ASCII for UI
+  const storageSafeName = sanitizeFilename(file.name, true); // Safe for storage
   const fileId = crypto.randomUUID();
-  const storagePath = `${userId}/${fileId}_${sanitizedName}`;
+  const storagePath = `${userId}/${fileId}_${storageSafeName}`;
 
   // Upload to storage
   const { error: uploadError } = await supabase.storage
@@ -82,7 +96,7 @@ export async function uploadFile(
       workspace_id: workspaceId,
       folder_id: folderId,
       owner_id: userId,
-      name: sanitizedName,
+      name: displayName,
       storage_path: storagePath,
       mime_type: file.type || "application/octet-stream",
       size_bytes: file.size,

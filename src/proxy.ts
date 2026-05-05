@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const publicRoutes = ["/login", "/signup", "/reset-password", "/auth/callback"];
 const authRoutes = ["/login", "/signup", "/reset-password"];
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
