@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Loader2, CheckCircle, Github } from "lucide-react";
+import { UserPlus, Loader2, CheckCircle, Link2 as GithubIcon } from "lucide-react";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -81,7 +81,7 @@ export default function SignupPage() {
             target="_blank"
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800/50 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 transition-all text-xs"
           >
-            <Github className="h-3.5 w-3.5" />
+            <GithubIcon className="h-3.5 w-3.5" />
             GitHub Profile
           </Link>
         </div>
