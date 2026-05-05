@@ -6,8 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FolderOpen, Activity } from "lucide-react";
+import { Users, FolderOpen, Activity, ExternalLink } from "lucide-react";
 import { ToggleActiveButton } from "@/components/admin/toggle-active-button";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 function formatSize(bytes: number) {
   if (bytes === 0) return "0 B";
@@ -126,7 +128,17 @@ export default async function AdminPage() {
                         </TableCell>
                         <TableCell className="text-zinc-500 text-sm">{new Date(user.created_at).toLocaleDateString()}</TableCell>
                         <TableCell className="text-right">
-                          <ToggleActiveButton userId={user.id} isActive={user.is_active} />
+                          <div className="flex justify-end gap-2">
+                            {(user as any).workspaces?.[0]?.id && (
+                              <Button asChild variant="ghost" size="sm" className="h-8 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10">
+                                <Link href={`/workspace/${(user as any).workspaces[0].id}`}>
+                                  <ExternalLink className="h-4 w-4 mr-2" />
+                                  View Files
+                                </Link>
+                              </Button>
+                            )}
+                            <ToggleActiveButton userId={user.id} isActive={user.is_active} />
+                          </div>
                         </TableCell>
                       </TableRow>
                     );

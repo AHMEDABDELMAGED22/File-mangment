@@ -33,9 +33,10 @@ export default async function WorkspacePage({ params, searchParams }: Props) {
   const basePath = `/workspace/${id}`;
   const isEmpty = contents.folders.length === 0 && contents.files.length === 0;
 
+  const ownerName = workspace.profiles?.full_name ? `${workspace.profiles.full_name}'s Workspace` : workspace.name;
   return (
     <div className="space-y-6">
-      <WorkspaceBreadcrumbs workspaceId={id} workspaceName={workspace.name} items={[]} />
+      <WorkspaceBreadcrumbs workspaceId={id} workspaceName={ownerName} items={[]} />
 
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <Suspense fallback={null}>

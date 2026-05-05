@@ -20,16 +20,16 @@ export async function getUserWorkspace(userId: string): Promise<Workspace | null
 /**
  * Get workspace by ID (RLS will enforce ownership)
  */
-export async function getWorkspaceById(workspaceId: string): Promise<Workspace | null> {
+export async function getWorkspaceById(workspaceId: string): Promise<(Workspace & { profiles?: { full_name: string } }) | null> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("workspaces")
-    .select("*")
+    .select("*, profiles!workspaces_owner_id_fkey(full_name)")
     .eq("id", workspaceId)
     .single();
 
   if (error || !data) return null;
-  return data as Workspace;
+  return data as any;
 }
 
 /**
