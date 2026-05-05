@@ -34,7 +34,10 @@ export function FileCard({ file, onRename, onMove, onDelete, onDownload, onPrevi
   const { icon: Icon, color, bg } = getFileIcon(file.mime_type);
 
   return (
-    <div className="group relative flex items-center gap-3 p-3 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all duration-200">
+    <div 
+      onClick={() => onPreview(file)}
+      className="group relative flex items-center gap-3 p-3 rounded-xl border border-zinc-800 bg-zinc-900/50 hover:bg-zinc-800/50 hover:border-zinc-700 transition-all duration-200 cursor-pointer"
+    >
       <div className={`h-10 w-10 rounded-lg bg-gradient-to-br ${bg} border flex items-center justify-center shrink-0`}>
         <Icon className={`h-5 w-5 ${color}`} />
       </div>
