@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Loader2, CheckCircle } from "lucide-react";
+import { UserPlus, Loader2, CheckCircle, Github } from "lucide-react";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -68,11 +68,23 @@ export default function SignupPage() {
           </form>
         )}
       </CardContent>
-      <CardFooter className="justify-center">
+      <CardFooter className="flex-col gap-4">
         <p className="text-sm text-zinc-400">
           Already have an account?{" "}
           <Link href="/login" className="text-violet-400 hover:text-violet-300 font-medium transition-colors">Sign in</Link>
         </p>
+        <div className="pt-4 border-t border-zinc-800 w-full text-center">
+          <p className="text-zinc-500 text-[10px] uppercase tracking-widest mb-2">Developed by</p>
+          <p className="text-zinc-300 font-bold text-sm mb-3">Ahmed Mohamed</p>
+          <Link 
+            href="https://github.com/AHMEDABDELMAGED22" 
+            target="_blank"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-800/50 border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 transition-all text-xs"
+          >
+            <Github className="h-3.5 w-3.5" />
+            GitHub Profile
+          </Link>
+        </div>
       </CardFooter>
     </Card>
   );

@@ -8,6 +8,7 @@ import { EmptyState } from "./empty-state";
 import { RenameDialog } from "./rename-dialog";
 import { DeleteDialog } from "./delete-dialog";
 import { MoveDialog } from "./move-dialog";
+import { PreviewDialog } from "./preview-dialog";
 import { downloadFileAction } from "@/actions/file.actions";
 import { toast } from "sonner";
 
@@ -25,11 +26,31 @@ export function FileGrid({ folders, files, allFolders, workspaceId, currentFolde
   const [renameItem, setRenameItem] = useState<{ id: string; name: string; type: "folder" | "file" } | null>(null);
   const [deleteItem, setDeleteItem] = useState<{ id: string; name: string; type: "folder" | "file" } | null>(null);
   const [moveItem, setMoveItem] = useState<{ id: string; name: string; type: "folder" | "file" } | null>(null);
+  const [previewFile, setPreviewFile] = useState<FileRecord | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleDownload = useCallback(async (file: FileRecord) => {
     const result = await downloadFileAction(file.id);
     if (result.error) { toast.error(result.error); return; }
-    if (result.url) window.open(result.url, "_blank");
+    if (result.url) {
+      // If downloading from preview, don't open in new tab, just trigger download
+      const a = document.createElement("a");
+      a.href = result.url;
+      a.download = file.name;
+      a.click();
+    }
+  }, []);
+
+  const handlePreview = useCallback(async (file: FileRecord) => {
+    setPreviewFile(file);
+    setPreviewUrl(null);
+    const result = await downloadFileAction(file.id);
+    if (result.error) { 
+      toast.error(result.error); 
+      setPreviewFile(null);
+      return; 
+    }
+    if (result.url) setPreviewUrl(result.url);
   }, []);
 
   if (isEmpty) {
@@ -63,6 +84,7 @@ export function FileGrid({ folders, files, allFolders, workspaceId, currentFolde
                   onMove={(f) => setMoveItem({ id: f.id, name: f.name, type: "file" })}
                   onDelete={(f) => setDeleteItem({ id: f.id, name: f.name, type: "file" })}
                   onDownload={handleDownload}
+                  onPreview={handlePreview}
                 />
               ))}
             </div>
@@ -82,6 +104,16 @@ export function FileGrid({ folders, files, allFolders, workspaceId, currentFolde
         <MoveDialog open={!!moveItem} onOpenChange={(o) => !o && setMoveItem(null)}
           itemId={moveItem.id} itemName={moveItem.name} type={moveItem.type}
           folders={allFolders} currentFolderId={currentFolderId} />
+      )}
+
+      {previewFile && (
+        <PreviewDialog 
+          open={!!previewFile} 
+          onOpenChange={(o) => !o && setPreviewFile(null)}
+          file={previewFile}
+          url={previewUrl}
+          onDownload={handleDownload}
+        />
       )}
     </>
   );

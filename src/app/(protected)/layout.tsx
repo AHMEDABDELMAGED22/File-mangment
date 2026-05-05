@@ -12,9 +12,14 @@ export default async function ProtectedLayout({ children }: { children: React.Re
       <Sidebar profile={profile} workspaceId={workspace?.id || ""} />
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
         <Topbar profile={profile} />
-        <main className="flex-1 p-4 md:p-6 lg:p-8">
+        <main className="flex-1 overflow-y-auto bg-zinc-950 p-4 sm:p-6 pb-20">
           {children}
         </main>
+        <footer className="fixed bottom-0 right-0 left-0 sm:left-64 h-10 bg-zinc-950/80 backdrop-blur-md border-t border-zinc-900 flex items-center justify-center z-10">
+          <p className="text-zinc-500 text-[10px] sm:text-xs font-medium tracking-wider uppercase">
+            Made by <span className="text-zinc-300">Ahmed AbdElmaged</span>
+          </p>
+        </footer>
       </div>
     </div>
   );

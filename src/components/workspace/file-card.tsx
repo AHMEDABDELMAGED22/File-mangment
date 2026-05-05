@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Image, Film, Music, Archive, FileCode, MoreVertical, Pencil, Move, Trash2, Download } from "lucide-react";
+import { FileText, Image, Film, Music, Archive, FileCode, MoreVertical, Pencil, Move, Trash2, Download, Eye } from "lucide-react";
 import type { FileRecord } from "@/lib/types";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
@@ -10,6 +10,7 @@ interface Props {
   onMove: (file: FileRecord) => void;
   onDelete: (file: FileRecord) => void;
   onDownload: (file: FileRecord) => void;
+  onPreview: (file: FileRecord) => void;
 }
 
 function getFileIcon(mimeType: string) {
@@ -29,7 +30,7 @@ function formatSize(bytes: number) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }
 
-export function FileCard({ file, onRename, onMove, onDelete, onDownload }: Props) {
+export function FileCard({ file, onRename, onMove, onDelete, onDownload, onPreview }: Props) {
   const { icon: Icon, color, bg } = getFileIcon(file.mime_type);
 
   return (
@@ -46,6 +47,7 @@ export function FileCard({ file, onRename, onMove, onDelete, onDownload }: Props
           <MoreVertical className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800">
+          <DropdownMenuItem onClick={() => onPreview(file)} className="cursor-pointer"><Eye className="h-4 w-4 mr-2" />Preview</DropdownMenuItem>
           <DropdownMenuItem onClick={() => onDownload(file)} className="cursor-pointer"><Download className="h-4 w-4 mr-2" />Download</DropdownMenuItem>
           <DropdownMenuItem onClick={() => onRename(file)} className="cursor-pointer"><Pencil className="h-4 w-4 mr-2" />Rename</DropdownMenuItem>
           <DropdownMenuItem onClick={() => onMove(file)} className="cursor-pointer"><Move className="h-4 w-4 mr-2" />Move</DropdownMenuItem>

@@ -15,6 +15,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
         {children}
       </div>
+      <footer className="fixed bottom-0 right-0 left-0 h-10 bg-zinc-950/20 backdrop-blur-sm border-t border-zinc-900/50 flex items-center justify-center z-10">
+        <p className="text-zinc-500 text-[10px] sm:text-xs font-medium tracking-wider uppercase">
+          Made by <span className="text-zinc-300">Ahmed AbdElmaged</span>
+        </p>
+      </footer>
     </div>
   );
 }
