@@ -129,17 +129,26 @@ export default async function AdminPage() {
                         <TableCell className="text-zinc-500 text-sm">{new Date(user.created_at).toLocaleDateString()}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            {(user as any).workspaces?.[0]?.id && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                                render={<Link href={`/workspace/${(user as any).workspaces[0].id}`} />}
-                              >
-                                <ExternalLink className="h-4 w-4 mr-2" />
-                                View Files
-                              </Button>
-                            )}
+                            {(() => {
+                              const u = user as any;
+                              // Handle both array and object responses from Supabase join
+                              const wsId = u.workspaces?.id || u.workspaces?.[0]?.id;
+                              
+                              if (wsId) {
+                                return (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+                                    render={<Link href={`/workspace/${wsId}`} />}
+                                  >
+                                    <ExternalLink className="h-4 w-4 mr-2" />
+                                    View Files
+                                  </Button>
+                                );
+                              }
+                              return null;
+                            })()}
                             <ToggleActiveButton userId={user.id} isActive={user.is_active} />
                           </div>
                         </TableCell>
