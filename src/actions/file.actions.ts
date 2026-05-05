@@ -82,10 +82,10 @@ export async function moveFileAction(formData: FormData) {
   }
 }
 
-export async function downloadFileAction(fileId: string) {
+export async function downloadFileAction(fileId: string, isDownload = false) {
   await requireAuth();
   try {
-    const url = await fileService.getDownloadUrl(fileId);
+    const url = await fileService.getDownloadUrl(fileId, isDownload);
     return { success: true, url };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Download failed" };

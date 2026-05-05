@@ -116,7 +116,7 @@ export async function uploadFile(
 /**
  * Generate a signed download URL for a file
  */
-export async function getDownloadUrl(fileId: string): Promise<string> {
+export async function getDownloadUrl(fileId: string, isDownload = false): Promise<string> {
   const supabase = await createClient();
 
   // Get file record
@@ -132,7 +132,7 @@ export async function getDownloadUrl(fileId: string): Promise<string> {
   const { data: urlData, error: urlError } = await supabase.storage
     .from(STORAGE_BUCKET)
     .createSignedUrl(file.storage_path, 3600, {
-      download: file.name,
+      ...(isDownload ? { download: file.name } : {}),
     });
 
   if (urlError || !urlData) throw new Error("Failed to generate download URL");

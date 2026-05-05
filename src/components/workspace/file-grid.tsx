@@ -30,7 +30,7 @@ export function FileGrid({ folders, files, allFolders, workspaceId, currentFolde
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const handleDownload = useCallback(async (file: FileRecord) => {
-    const result = await downloadFileAction(file.id);
+    const result = await downloadFileAction(file.id, true);
     if (result.error) { toast.error(result.error); return; }
     if (result.url) {
       // If downloading from preview, don't open in new tab, just trigger download
@@ -44,7 +44,7 @@ export function FileGrid({ folders, files, allFolders, workspaceId, currentFolde
   const handlePreview = useCallback(async (file: FileRecord) => {
     setPreviewFile(file);
     setPreviewUrl(null);
-    const result = await downloadFileAction(file.id);
+    const result = await downloadFileAction(file.id, false);
     if (result.error) { 
       toast.error(result.error); 
       setPreviewFile(null);
