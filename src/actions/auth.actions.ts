@@ -21,7 +21,7 @@ export async function signUp(formData: FormData) {
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({ email: parsed.data.email, password: parsed.data.password, options: { data: { full_name: parsed.data.full_name } } });
   if (error) return { error: error.message };
-  return { success: "Check your email to confirm your account." };
+  redirect("/dashboard");
 }
 
 export async function signOut() {
