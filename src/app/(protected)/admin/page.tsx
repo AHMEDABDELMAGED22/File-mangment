@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Users, FolderOpen, Activity, ExternalLink } from "lucide-react";
 import { ToggleActiveButton } from "@/components/admin/toggle-active-button";
+import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -150,6 +151,7 @@ export default async function AdminPage() {
                               return null;
                             })()}
                             <ToggleActiveButton userId={user.id} isActive={user.is_active} />
+                            <DeleteUserButton userId={user.id} userName={user.full_name || "Unknown"} disabled={user.role === "admin"} />
                           </div>
                         </TableCell>
                       </TableRow>

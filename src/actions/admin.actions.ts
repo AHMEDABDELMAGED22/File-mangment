@@ -31,3 +31,20 @@ export async function getAllActivityAction(limit = 50) {
   if (error) return { error: error.message };
   return { activities: data };
 }
+
+export async function deleteUserAction(formData: FormData) {
+  const user = await requireAdmin();
+  const targetUserId = formData.get("user_id") as string;
+  
+  if (!targetUserId) return { error: "User ID is required" };
+  if (user.id === targetUserId) return { error: "You cannot delete your own account" };
+  
+  try {
+    const { deleteUserAccount } = await import("@/services/admin.service");
+    await deleteUserAccount(targetUserId);
+    revalidatePath("/admin");
+    return { success: true };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Failed to delete user" };
+  }
+}
