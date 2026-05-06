@@ -46,15 +46,18 @@ export function FileCard({ file, onRename, onMove, onDelete, onDownload, onPrevi
         <p className="text-xs text-zinc-500">{formatSize(file.size_bytes)} · {new Date(file.created_at).toLocaleDateString()}</p>
       </div>
       <DropdownMenu>
-        <DropdownMenuTrigger className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md hover:bg-zinc-700 transition-all text-zinc-400 hover:text-white outline-none">
+        <DropdownMenuTrigger
+          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md hover:bg-zinc-700 transition-all text-zinc-400 hover:text-white outline-none"
+          onClick={(e) => e.stopPropagation()}
+        >
           <MoreVertical className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-zinc-900 border-zinc-800">
-          <DropdownMenuItem onClick={() => onPreview(file)} className="cursor-pointer"><Eye className="h-4 w-4 mr-2" />Preview</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onDownload(file)} className="cursor-pointer"><Download className="h-4 w-4 mr-2" />Download</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onRename(file)} className="cursor-pointer"><Pencil className="h-4 w-4 mr-2" />Rename</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onMove(file)} className="cursor-pointer"><Move className="h-4 w-4 mr-2" />Move</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => onDelete(file)} className="text-red-400 focus:text-red-400 cursor-pointer"><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onPreview(file); }} className="cursor-pointer"><Eye className="h-4 w-4 mr-2" />Preview</DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDownload(file); }} className="cursor-pointer"><Download className="h-4 w-4 mr-2" />Download</DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRename(file); }} className="cursor-pointer"><Pencil className="h-4 w-4 mr-2" />Rename</DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMove(file); }} className="cursor-pointer"><Move className="h-4 w-4 mr-2" />Move</DropdownMenuItem>
+          <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDelete(file); }} className="text-red-400 focus:text-red-400 cursor-pointer"><Trash2 className="h-4 w-4 mr-2" />Delete</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
