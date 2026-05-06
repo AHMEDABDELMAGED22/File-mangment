@@ -169,7 +169,7 @@ export async function deleteFolder(folderId: string): Promise<void> {
       .from("files")
       .remove(storagePaths);
     if (storageError) {
-      console.error("Storage cleanup error:", storageError);
+      throw new Error(`Storage cleanup error: ${storageError.message}`);
     }
   }
 

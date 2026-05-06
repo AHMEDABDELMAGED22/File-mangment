@@ -49,7 +49,14 @@ export function DeleteDialog({ open, onOpenChange, itemId, itemName, type }: Pro
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel className="bg-zinc-800 border-zinc-700 text-zinc-300">Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-red-600 hover:bg-red-700 text-white">
+          <AlertDialogAction 
+            onClick={(e) => {
+              e.preventDefault();
+              handleDelete();
+            }} 
+            disabled={deleting} 
+            className="bg-red-600 hover:bg-red-700 text-white"
+          >
             {deleting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             {deleting ? "Deleting..." : "Delete"}
           </AlertDialogAction>

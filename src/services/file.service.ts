@@ -197,7 +197,7 @@ export async function deleteFile(fileId: string): Promise<void> {
     .remove([file.storage_path]);
 
   if (storageError) {
-    console.error("Storage delete error:", storageError);
+    throw new Error(`Storage delete error: ${storageError.message}`);
   }
 
   // Delete from database
