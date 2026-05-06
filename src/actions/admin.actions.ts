@@ -33,7 +33,7 @@ export async function getAllActivityAction(limit = 50) {
 }
 
 export async function deleteUserAction(formData: FormData) {
-  const user = await requireAdmin();
+  const { user } = await requireAdmin();
   const targetUserId = formData.get("user_id") as string;
   
   if (!targetUserId) return { error: "User ID is required" };
