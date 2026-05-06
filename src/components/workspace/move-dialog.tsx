@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Loader2, FolderOpen, Home } from "lucide-react";
 import type { Folder } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 interface Props {
   open: boolean;
@@ -21,26 +22,31 @@ interface Props {
 }
 
 export function MoveDialog({ open, onOpenChange, itemId, itemName, type, folders, currentFolderId }: Props) {
+  const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
   const [moving, setMoving] = useState(false);
 
   async function handleMove() {
     setMoving(true);
     const formData = new FormData();
+    let success = false;
     if (type === "folder") {
       formData.set("folder_id", itemId);
       formData.set("target_parent_folder_id", selected || "");
       const result = await moveFolderAction(formData);
       if (result.error) toast.error(result.error);
-      else { toast.success("Folder moved"); onOpenChange(false); }
+      else { toast.success("Folder moved"); onOpenChange(false); success = true; }
     } else {
       formData.set("file_id", itemId);
       formData.set("target_folder_id", selected || "");
       const result = await moveFileAction(formData);
       if (result.error) toast.error(result.error);
-      else { toast.success("File moved"); onOpenChange(false); }
+      else { toast.success("File moved"); onOpenChange(false); success = true; }
     }
     setMoving(false);
+    if (success) {
+      router.refresh();
+    }
   }
 
   const available = folders.filter((f) => f.id !== itemId && f.id !== currentFolderId);

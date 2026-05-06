@@ -10,6 +10,7 @@ import { renameFolderAction } from "@/actions/workspace.actions";
 import { renameFileAction } from "@/actions/file.actions";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface Props {
   open: boolean;
@@ -30,6 +31,7 @@ function SubmitBtn() {
 }
 
 export function RenameDialog({ open, onOpenChange, itemId, currentName, type }: Props) {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
   async function handleSubmit(formData: FormData) {
@@ -38,12 +40,12 @@ export function RenameDialog({ open, onOpenChange, itemId, currentName, type }: 
       formData.set("folder_id", itemId);
       const result = await renameFolderAction(formData);
       if (result.error) { setError(result.error); toast.error(result.error); }
-      else { toast.success("Folder renamed"); onOpenChange(false); }
+      else { toast.success("Folder renamed"); onOpenChange(false); router.refresh(); }
     } else {
       formData.set("file_id", itemId);
       const result = await renameFileAction(formData);
       if (result.error) { setError(result.error); toast.error(result.error); }
-      else { toast.success("File renamed"); onOpenChange(false); }
+      else { toast.success("File renamed"); onOpenChange(false); router.refresh(); }
     }
   }
 
