@@ -22,7 +22,7 @@ export function PreviewDialog({ file, url, open, onOpenChange, onDownload }: Pro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[90vw] w-full h-[90vh] bg-zinc-900 border-zinc-800 p-0 overflow-hidden flex flex-col gap-0 shadow-2xl">
+      <DialogContent className="max-w-[95vw] sm:max-w-[70vw] w-full h-[85vh] bg-zinc-900 border-zinc-800 p-0 overflow-hidden flex flex-col gap-0 shadow-2xl">
         <DialogHeader className="p-4 border-b border-zinc-800 flex flex-row items-center justify-between shrink-0 space-y-0">
           <div className="flex items-center gap-3">
             <div className="h-8 w-8 rounded bg-violet-500/10 border border-violet-500/20 flex items-center justify-center">
