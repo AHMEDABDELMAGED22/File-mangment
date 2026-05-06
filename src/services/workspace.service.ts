@@ -163,9 +163,11 @@ export async function deleteFolder(folderId: string): Promise<void> {
   // First, collect all file storage paths in this folder tree
   const storagePaths = await collectFolderFilePaths(folderId);
 
-  // Delete from storage
+  // Delete from storage using admin client to bypass RLS
   if (storagePaths.length > 0) {
-    const { error: storageError } = await supabase.storage
+    const { createAdminClient } = await import("@/lib/supabase/admin");
+    const adminClient = createAdminClient();
+    const { error: storageError } = await adminClient.storage
       .from("files")
       .remove(storagePaths);
     if (storageError) {

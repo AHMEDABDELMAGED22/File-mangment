@@ -191,8 +191,10 @@ export async function deleteFile(fileId: string): Promise<void> {
 
   if (fetchError || !file) throw new Error("File not found");
 
-  // Delete from storage
-  const { error: storageError } = await supabase.storage
+  // Delete from storage using admin client to bypass RLS
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const adminClient = createAdminClient();
+  const { error: storageError } = await adminClient.storage
     .from(STORAGE_BUCKET)
     .remove([file.storage_path]);
 
