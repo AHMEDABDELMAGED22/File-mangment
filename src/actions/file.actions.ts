@@ -22,7 +22,7 @@ export async function uploadFileAction(formData: FormData) {
   try {
     const record = await fileService.uploadFile(user.id, workspaceId, folderId, file);
     await logActivity(workspaceId, user.id, ACTIONS.FILE_UPLOAD, TARGET_TYPES.FILE, record.id, { name: record.name, size: record.size_bytes });
-    revalidatePath("/workspace");
+    revalidatePath("/workspace", "layout");
     return { success: true, file: record };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Upload failed" };
@@ -43,7 +43,7 @@ export async function deleteFileAction(formData: FormData) {
 
     await fileService.deleteFile(parsed.data.file_id);
     await logActivity(file.workspace_id, user.id, ACTIONS.FILE_DELETE, TARGET_TYPES.FILE, parsed.data.file_id, { name: file.name });
-    revalidatePath("/workspace");
+    revalidatePath("/workspace", "layout");
     return { success: true };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Delete failed" };
@@ -59,7 +59,7 @@ export async function renameFileAction(formData: FormData) {
   try {
     const record = await fileService.renameFile(parsed.data.file_id, parsed.data.name);
     await logActivity(record.workspace_id, user.id, ACTIONS.FILE_RENAME, TARGET_TYPES.FILE, record.id, { name: record.name });
-    revalidatePath("/workspace");
+    revalidatePath("/workspace", "layout");
     return { success: true, file: record };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Rename failed" };
@@ -75,7 +75,7 @@ export async function moveFileAction(formData: FormData) {
   try {
     const record = await fileService.moveFile(parsed.data.file_id, parsed.data.target_folder_id);
     await logActivity(record.workspace_id, user.id, ACTIONS.FILE_MOVE, TARGET_TYPES.FILE, record.id, { name: record.name });
-    revalidatePath("/workspace");
+    revalidatePath("/workspace", "layout");
     return { success: true, file: record };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Move failed" };
@@ -101,7 +101,7 @@ export async function registerFileAction(
       size: record.size_bytes,
       method: "client-side" 
     });
-    revalidatePath("/workspace");
+    revalidatePath("/workspace", "layout");
     return { success: true, file: record };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Registration failed" };

@@ -16,7 +16,7 @@ export async function createFolderAction(formData: FormData) {
   try {
     const folder = await workspaceService.createFolder(parsed.data.workspace_id, parsed.data.name, parsed.data.parent_folder_id);
     await logActivity(parsed.data.workspace_id, user.id, ACTIONS.FOLDER_CREATE, TARGET_TYPES.FOLDER, folder.id, { name: folder.name });
-    revalidatePath("/workspace");
+    revalidatePath("/workspace", "layout");
     return { success: true, folder };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Failed to create folder" };
@@ -32,7 +32,7 @@ export async function renameFolderAction(formData: FormData) {
   try {
     const folder = await workspaceService.renameFolder(parsed.data.folder_id, parsed.data.name);
     await logActivity(folder.workspace_id, user.id, ACTIONS.FOLDER_RENAME, TARGET_TYPES.FOLDER, folder.id, { name: folder.name });
-    revalidatePath("/workspace");
+    revalidatePath("/workspace", "layout");
     return { success: true, folder };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Failed to rename folder" };
@@ -48,7 +48,7 @@ export async function moveFolderAction(formData: FormData) {
   try {
     const folder = await workspaceService.moveFolder(parsed.data.folder_id, parsed.data.target_parent_folder_id);
     await logActivity(folder.workspace_id, user.id, ACTIONS.FOLDER_MOVE, TARGET_TYPES.FOLDER, folder.id, { name: folder.name });
-    revalidatePath("/workspace");
+    revalidatePath("/workspace", "layout");
     return { success: true, folder };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Failed to move folder" };
@@ -70,7 +70,7 @@ export async function deleteFolderAction(formData: FormData) {
 
     await workspaceService.deleteFolder(parsed.data.folder_id);
     await logActivity(folder.workspace_id, user.id, ACTIONS.FOLDER_DELETE, TARGET_TYPES.FOLDER, parsed.data.folder_id, { name: folder.name });
-    revalidatePath("/workspace");
+    revalidatePath("/workspace", "layout");
     return { success: true };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Failed to delete folder" };
