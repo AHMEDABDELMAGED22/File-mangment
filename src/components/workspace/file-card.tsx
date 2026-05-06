@@ -47,7 +47,7 @@ export function FileCard({ file, onRename, onMove, onDelete, onDownload, onPrevi
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger
-          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md hover:bg-zinc-700 transition-all text-zinc-400 hover:text-white outline-none"
+          className="p-1.5 rounded-md hover:bg-zinc-700 transition-all text-zinc-400 hover:text-white outline-none"
           onClick={(e) => e.stopPropagation()}
         >
           <MoreVertical className="h-4 w-4" />
