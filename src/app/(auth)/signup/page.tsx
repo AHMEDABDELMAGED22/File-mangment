@@ -22,14 +22,11 @@ function SubmitButton() {
 
 export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
 
   async function handleSubmit(formData: FormData) {
     setError(null);
-    setSuccess(null);
     const result = await signUp(formData);
     if (result?.error) setError(result.error);
-    if (result?.success) setSuccess(result.success);
   }
 
   return (
@@ -39,34 +36,28 @@ export default function SignupPage() {
         <CardDescription className="text-zinc-400">Get started with your secure file workspace</CardDescription>
       </CardHeader>
       <CardContent>
-        {success ? (
-          <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm flex items-start gap-2">
-            <CheckCircle className="h-5 w-5 shrink-0 mt-0.5" /><div>{success}</div>
+        <form action={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
+          )}
+          <div className="space-y-2">
+            <Label htmlFor="full_name" className="text-zinc-300">Full Name</Label>
+            <Input id="full_name" name="full_name" type="text" placeholder="John Doe" required className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-violet-500 focus:ring-violet-500/20" />
           </div>
-        ) : (
-          <form action={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{error}</div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="full_name" className="text-zinc-300">Full Name</Label>
-              <Input id="full_name" name="full_name" type="text" placeholder="John Doe" required className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-violet-500 focus:ring-violet-500/20" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-zinc-300">Email</Label>
-              <Input id="email" name="email" type="email" placeholder="you@example.com" required className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-violet-500 focus:ring-violet-500/20" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-zinc-300">Password</Label>
-              <Input id="password" name="password" type="password" placeholder="••••••••" required minLength={6} className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-violet-500 focus:ring-violet-500/20" />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirm_password" className="text-zinc-300">Confirm Password</Label>
-              <Input id="confirm_password" name="confirm_password" type="password" placeholder="••••••••" required className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-violet-500 focus:ring-violet-500/20" />
-            </div>
-            <SubmitButton />
-          </form>
-        )}
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-zinc-300">Email</Label>
+            <Input id="email" name="email" type="email" placeholder="you@example.com" required className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-violet-500 focus:ring-violet-500/20" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="password" className="text-zinc-300">Password</Label>
+            <Input id="password" name="password" type="password" placeholder="••••••••" required minLength={6} className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-violet-500 focus:ring-violet-500/20" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm_password" className="text-zinc-300">Confirm Password</Label>
+            <Input id="confirm_password" name="confirm_password" type="password" placeholder="••••••••" required className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-violet-500 focus:ring-violet-500/20" />
+          </div>
+          <SubmitButton />
+        </form>
       </CardContent>
       <CardFooter className="flex-col gap-4">
         <p className="text-sm text-zinc-400">
