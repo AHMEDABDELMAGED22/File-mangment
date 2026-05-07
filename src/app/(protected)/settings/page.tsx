@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { updateProfile, updatePassword } from "@/actions/auth.actions";
+import { linkMyStudentCodeAction, getMyGradeAction } from "@/actions/grade.actions";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, Save, Lock } from "lucide-react";
+import { Loader2, Save, Lock, Link2, Hash } from "lucide-react";
 import { toast } from "sonner";
 
 function SaveBtn() {
@@ -31,9 +32,27 @@ function PasswordBtn() {
   );
 }
 
+function LinkCodeBtn() {
+  const { pending } = useFormStatus();
+  return (
+    <Button type="submit" disabled={pending} className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white">
+      {pending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Link2 className="h-4 w-4 mr-2" />}
+      {pending ? "Linking..." : "Link Code"}
+    </Button>
+  );
+}
+
 export default function SettingsPage() {
   const [profileError, setProfileError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [linkedCode, setLinkedCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    getMyGradeAction()
+      .then((result) => setLinkedCode(result.gradeData?.student_code ?? null))
+      .catch(() => setLinkedCode(null));
+  }, []);
 
   async function handleProfile(formData: FormData) {
     setProfileError(null);
@@ -47,6 +66,21 @@ export default function SettingsPage() {
     const result = await updatePassword(formData);
     if (result?.error) { setPasswordError(result.error); toast.error(result.error); }
     if (result?.success) toast.success(result.success);
+  }
+
+  async function handleCodeLink(formData: FormData) {
+    setCodeError(null);
+    const result = await linkMyStudentCodeAction(formData);
+    if (result?.error) {
+      setCodeError(result.error);
+      toast.error(result.error);
+      return;
+    }
+    if (result?.success) {
+      const latest = await getMyGradeAction();
+      setLinkedCode(latest.gradeData?.student_code ?? null);
+      toast.success(result.success);
+    }
   }
 
   return (
@@ -94,6 +128,37 @@ export default function SettingsPage() {
               <Input id="confirm_password" name="confirm_password" type="password" placeholder="••••••••" required className="bg-zinc-800/50 border-zinc-700 text-white focus:border-violet-500" />
             </div>
             <PasswordBtn />
+          </form>
+        </CardContent>
+      </Card>
+
+      <Separator className="bg-zinc-800" />
+
+      {/* Grade Code */}
+      <Card className="border-zinc-800 bg-zinc-900/50">
+        <CardHeader>
+          <CardTitle className="text-lg text-white">Link Student Code</CardTitle>
+          <CardDescription className="text-zinc-400">Enter your code here if you skipped it during signup</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={handleCodeLink} className="space-y-4">
+            {codeError && <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">{codeError}</div>}
+            {linkedCode && (
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-sm flex items-center gap-2">
+                <Hash className="h-4 w-4" />
+                Currently linked code: <span className="font-mono font-semibold">{linkedCode}</span>
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="student_code" className="text-zinc-300">Student Code</Label>
+              <Input
+                id="student_code"
+                name="student_code"
+                placeholder="Enter your code"
+                className="bg-zinc-800/50 border-zinc-700 text-white focus:border-amber-500 font-mono"
+              />
+            </div>
+            <LinkCodeBtn />
           </form>
         </CardContent>
       </Card>
