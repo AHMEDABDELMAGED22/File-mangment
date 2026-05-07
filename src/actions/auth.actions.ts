@@ -80,7 +80,7 @@ export async function signUp(formData: FormData) {
             normalizedRecordCode === normalizedStudentCode ||
             digitsOnly(normalizedRecordCode) === codeDigits
           );
-        });
+        }) ?? null;
       }
     }
 
