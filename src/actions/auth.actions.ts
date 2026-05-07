@@ -58,21 +58,29 @@ export async function signUp(formData: FormData) {
     ].filter(Boolean)));
 
     // Check if code exists (support small formatting differences)
-    let { data: gradeRecord } = await adminClient
+    let { data: gradeRecord, error: gradeRecordError } = await adminClient
       .from("grade_records")
       .select("student_code")
       .in("student_code", candidateCodes)
       .single();
 
+    if (gradeRecordError && gradeRecordError.code !== "PGRST116") {
+      return { error: "Grade codes are not configured yet. Please contact admin." };
+    }
+
     // Fallback: search by numeric fingerprint in case CSV imported with odd separators/formatting.
     if (!gradeRecord) {
       const codeDigits = digitsOnly(normalizedStudentCode);
       if (codeDigits) {
-        const { data: possibleMatches } = await adminClient
+        const { data: possibleMatches, error: possibleMatchesError } = await adminClient
           .from("grade_records")
           .select("student_code")
           .ilike("student_code", `%${codeDigits}%`)
           .limit(20);
+
+        if (possibleMatchesError) {
+          return { error: "Grade codes are not configured yet. Please contact admin." };
+        }
 
         gradeRecord = possibleMatches?.find((record) => {
           const normalizedRecordCode = normalizeStudentCodeInput(record.student_code);
@@ -90,11 +98,15 @@ export async function signUp(formData: FormData) {
     studentCodeToClaim = gradeRecord.student_code;
 
     // Check if code is already claimed
-    const { data: existingLink } = await adminClient
+    const { data: existingLink, error: existingLinkError } = await adminClient
       .from("user_grade_links")
       .select("id")
       .eq("student_code", studentCodeToClaim)
       .single();
+
+    if (existingLinkError && existingLinkError.code !== "PGRST116") {
+      return { error: "Grade codes are not configured yet. Please contact admin." };
+    }
 
     if (existingLink) {
       return { error: "This code has already been claimed" };

@@ -20,6 +20,12 @@ export default async function GradesPage() {
         <p className="text-zinc-400 text-sm mt-2 ml-[52px]">
           View your linked grade record
         </p>
+        <div className="ml-[52px] mt-3 inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1.5">
+          <BookOpen className="h-3.5 w-3.5 text-amber-400" />
+          <span className="text-xs font-semibold tracking-wide text-amber-300">
+            Network - Mid term grades
+          </span>
+        </div>
       </div>
 
       {gradeData ? (
