@@ -4,6 +4,21 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { loginSchema, signupSchema, resetPasswordSchema, updatePasswordSchema, updateProfileSchema } from "@/lib/validators/auth";
 
+function normalizeStudentCodeInput(code: string): string {
+  return code
+    .replace(/[\u200B-\u200D\uFEFF]/g, "")
+    .replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660))
+    .replace(/[\u06F0-\u06F9]/g, (d) => String(d.charCodeAt(0) - 0x06f0))
+    .trim()
+    .replace(/^["']+|["']+$/g, "")
+    .replace(/\s+/g, "")
+    .replace(/[.]+$/g, "");
+}
+
+function digitsOnly(code: string): string {
+  return code.replace(/\D/g, "");
+}
+
 export async function signIn(formData: FormData) {
   const raw = { email: formData.get("email") as string, password: formData.get("password") as string };
   const parsed = loginSchema.safeParse(raw);
@@ -25,29 +40,60 @@ export async function signUp(formData: FormData) {
   const parsed = signupSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
-  const studentCode = parsed.data.student_code?.trim() || "";
+  const rawStudentCode = parsed.data.student_code?.trim() || "";
+  const normalizedStudentCode = normalizeStudentCodeInput(rawStudentCode);
+  let studentCodeToClaim = normalizedStudentCode;
 
   // If a code was provided, validate it exists and is not claimed BEFORE creating the account
-  if (studentCode) {
+  if (normalizedStudentCode) {
     const { createAdminClient } = await import("@/lib/supabase/admin");
     const adminClient = createAdminClient();
+    const candidateCodes = Array.from(new Set([
+      rawStudentCode,
+      normalizedStudentCode,
+      `${normalizedStudentCode}.0`,
+      `${normalizedStudentCode}.`,
+      `"${normalizedStudentCode}"`,
+      `'${normalizedStudentCode}'`,
+    ].filter(Boolean)));
 
-    // Check if code exists
-    const { data: gradeRecord } = await adminClient
+    // Check if code exists (support small formatting differences)
+    let { data: gradeRecord } = await adminClient
       .from("grade_records")
       .select("student_code")
-      .eq("student_code", studentCode)
+      .in("student_code", candidateCodes)
       .single();
+
+    // Fallback: search by numeric fingerprint in case CSV imported with odd separators/formatting.
+    if (!gradeRecord) {
+      const codeDigits = digitsOnly(normalizedStudentCode);
+      if (codeDigits) {
+        const { data: possibleMatches } = await adminClient
+          .from("grade_records")
+          .select("student_code")
+          .ilike("student_code", `%${codeDigits}%`)
+          .limit(20);
+
+        gradeRecord = possibleMatches?.find((record) => {
+          const normalizedRecordCode = normalizeStudentCodeInput(record.student_code);
+          return (
+            normalizedRecordCode === normalizedStudentCode ||
+            digitsOnly(normalizedRecordCode) === codeDigits
+          );
+        });
+      }
+    }
 
     if (!gradeRecord) {
       return { error: "Invalid code" };
     }
+    studentCodeToClaim = gradeRecord.student_code;
 
     // Check if code is already claimed
     const { data: existingLink } = await adminClient
       .from("user_grade_links")
       .select("id")
-      .eq("student_code", studentCode)
+      .eq("student_code", studentCodeToClaim)
       .single();
 
     if (existingLink) {
@@ -64,9 +110,9 @@ export async function signUp(formData: FormData) {
   if (error) return { error: error.message };
 
   // If a student code was provided, claim it for the new user
-  if (studentCode && authData.user) {
+  if (studentCodeToClaim && authData.user) {
     const { claimStudentCode } = await import("@/services/grade.service");
-    const claimResult = await claimStudentCode(authData.user.id, studentCode);
+    const claimResult = await claimStudentCode(authData.user.id, studentCodeToClaim);
     if (!claimResult.success) {
       // The account was created but code claim failed — still allow login
       // but inform the user about the code issue
