@@ -6,9 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FolderOpen, Activity, ExternalLink } from "lucide-react";
+import { Users, FolderOpen, Activity, ExternalLink, GraduationCap } from "lucide-react";
 import { ToggleActiveButton } from "@/components/admin/toggle-active-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
+import { GradeCsvImport } from "@/components/admin/grade-import";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -92,6 +93,7 @@ export default async function AdminPage() {
         <TabsList className="bg-zinc-800/50 border border-zinc-700">
           <TabsTrigger value="users" className="data-[state=active]:bg-zinc-700 data-[state=active]:text-white">Users</TabsTrigger>
           <TabsTrigger value="activity" className="data-[state=active]:bg-zinc-700 data-[state=active]:text-white">Activity Log</TabsTrigger>
+          <TabsTrigger value="grades" className="data-[state=active]:bg-zinc-700 data-[state=active]:text-white">Grades</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -190,6 +192,12 @@ export default async function AdminPage() {
               </Table>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="grades">
+          <div className="space-y-6">
+            <GradeCsvImport />
+          </div>
         </TabsContent>
       </Tabs>
     </div>

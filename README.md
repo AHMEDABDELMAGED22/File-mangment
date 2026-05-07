@@ -18,6 +18,7 @@ A production-ready file management web application where each user has an isolat
 - **Dark-mode-first UI** — Polished, minimal, responsive design
 - **Activity logging** — Audit trail for all file operations
 - **Search & sort** — Find files quickly within your workspace
+- **Student Grades** — Users can optionally link a student code during signup to securely view their imported grades. Admins can bulk import grades via CSV.
 
 ## Tech Stack
 

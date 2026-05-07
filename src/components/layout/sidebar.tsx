@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/lib/types";
-import { Shield, LayoutDashboard, FolderOpen, Settings, Users, ChevronLeft, ChevronRight } from "lucide-react";
+import { Shield, LayoutDashboard, FolderOpen, Settings, Users, ChevronLeft, ChevronRight, GraduationCap } from "lucide-react";
 import { useState } from "react";
 
 interface SidebarProps {
@@ -16,10 +16,11 @@ const getNavItems = (workspaceId: string, isAdmin: boolean) => {
   const items = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: `/workspace/${workspaceId}`, label: "My Files", icon: FolderOpen },
+    { href: "/grades", label: "Your Grades", icon: GraduationCap },
     { href: "/settings", label: "Settings", icon: Settings },
   ];
   if (isAdmin) {
-    items.splice(2, 0, { href: "/admin", label: "Admin", icon: Users });
+    items.splice(3, 0, { href: "/admin", label: "Admin", icon: Users });
   }
   return items;
 };

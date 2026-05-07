@@ -16,6 +16,7 @@ export const signupSchema = z.object({
     .min(6, "Password must be at least 6 characters")
     .max(72, "Password must be less than 72 characters"),
   confirm_password: z.string(),
+  student_code: z.string().optional().default(""),
 }).refine((data) => data.password === data.confirm_password, {
   message: "Passwords don't match",
   path: ["confirm_password"],

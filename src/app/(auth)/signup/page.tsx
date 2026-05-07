@@ -56,6 +56,16 @@ export default function SignupPage() {
             <Label htmlFor="confirm_password" className="text-zinc-300">Confirm Password</Label>
             <Input id="confirm_password" name="confirm_password" type="password" placeholder="••••••••" required className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-violet-500 focus:ring-violet-500/20" />
           </div>
+          <div className="pt-2 border-t border-zinc-800">
+            <div className="space-y-2 pt-2">
+              <Label htmlFor="student_code" className="text-zinc-300 flex items-center gap-2">
+                His code
+                <span className="text-xs text-zinc-500 font-normal">(optional)</span>
+              </Label>
+              <Input id="student_code" name="student_code" type="text" placeholder="Enter your code (optional)" className="bg-zinc-800/50 border-zinc-700 text-white placeholder:text-zinc-500 focus:border-amber-500 focus:ring-amber-500/20 font-mono" />
+              <p className="text-xs text-zinc-500">If you have a student grade code, enter it here to link your grades.</p>
+            </div>
+          </div>
           <SubmitButton />
         </form>
       </CardContent>

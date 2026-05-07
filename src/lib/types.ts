@@ -70,3 +70,25 @@ export interface UserWithWorkspace extends Profile {
   workspace?: Workspace;
   storage_usage?: StorageUsage;
 }
+
+export interface GradeRecord {
+  id: string;
+  student_code: string;
+  student_name: string;
+  grade_value: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserGradeLink {
+  id: string;
+  user_id: string;
+  student_code: string;
+  created_at: string;
+}
+
+export interface UserGradeData {
+  student_code: string;
+  student_name: string;
+  grade_value: number | null;
+}
