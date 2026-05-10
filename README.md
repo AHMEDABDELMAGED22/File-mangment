@@ -18,7 +18,7 @@ A production-ready file management web application where each user has an isolat
 - **Dark-mode-first UI** — Polished, minimal, responsive design
 - **Activity logging** — Audit trail for all file operations
 - **Search & sort** — Find files quickly within your workspace
-- **Student Grades** — Users can optionally link a student code during signup to securely view their imported grades. Admins can bulk import grades via CSV.
+- **Student Grades** — Users can optionally link a student code during signup to securely view their imported grades across multiple subjects (Networks, JavaScript). Admins can bulk import grades via CSV and select the target subject.
 
 ## Tech Stack
 
@@ -82,6 +82,8 @@ Go to your Supabase dashboard **SQL Editor** and run each file in `supabase/migr
 7. `00007_storage_policies.sql`
 8. `00008_functions_triggers.sql`
 9. `00009_seed.sql`
+10. `003_grade_records.sql` (Legacy)
+11. `010_multiple_subjects_grades.sql`
 
 > **Tip:** You can also concatenate all files and run them as a single script.
 
