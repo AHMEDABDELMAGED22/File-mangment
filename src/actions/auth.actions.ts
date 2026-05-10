@@ -59,7 +59,7 @@ export async function signUp(formData: FormData) {
 
     // Check if code exists (support small formatting differences)
     let { data: gradeRecord, error: gradeRecordError } = await adminClient
-      .from("grade_records")
+      .from("students")
       .select("student_code")
       .in("student_code", candidateCodes)
       .single();
@@ -73,7 +73,7 @@ export async function signUp(formData: FormData) {
       const codeDigits = digitsOnly(normalizedStudentCode);
       if (codeDigits) {
         const { data: possibleMatches, error: possibleMatchesError } = await adminClient
-          .from("grade_records")
+          .from("students")
           .select("student_code")
           .ilike("student_code", `%${codeDigits}%`)
           .limit(20);
