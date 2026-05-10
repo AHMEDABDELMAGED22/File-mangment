@@ -20,16 +20,36 @@ export async function getUserGradeData(userId: string): Promise<UserGradeData | 
 
   if (linkError || !link) return null;
 
-  // Then, get the grade record
-  const { data: grade, error: gradeError } = await supabase
-    .from("grade_records")
-    .select("student_code, student_name, grade_value")
+  // Then, get the student's canonical record
+  const { data: student, error: studentError } = await supabase
+    .from("students")
+    .select("student_code, canonical_name")
     .eq("student_code", link.student_code)
     .single();
 
-  if (gradeError || !grade) return null;
+  if (studentError || !student) return null;
 
-  return grade as UserGradeData;
+  // Then, get all their subject grades
+  const { data: grades, error: gradesError } = await supabase
+    .from("subject_grade_records")
+    .select("grade_part_1, grade_part_2, grade_subjects(slug, name)")
+    .eq("student_code", link.student_code);
+
+  if (gradesError) return null;
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const subjects = (grades || []).map((g: any) => ({
+    subject_slug: g.grade_subjects.slug,
+    subject_name: g.grade_subjects.name,
+    grade_part_1: g.grade_part_1,
+    grade_part_2: g.grade_part_2,
+  }));
+
+  return {
+    student_code: student.student_code,
+    canonical_name: student.canonical_name,
+    subjects,
+  };
 }
 
 /**
@@ -51,7 +71,6 @@ export async function claimStudentCode(
     return { success: false, error: error.message };
   }
 
-  // The function returns JSON: { success: boolean, error?: string }
   const result = data as { success: boolean; error?: string };
   return result;
 }
@@ -64,11 +83,10 @@ export interface CsvImportResult {
 }
 
 /**
- * Import CSV grade data into the grade_records table.
+ * Import CSV grade data into the subject_grade_records table.
  * Admin-only operation using the service role client.
- * Upserts on student_code to handle duplicates gracefully.
  */
-export async function importGradesCsv(csvContent: string): Promise<CsvImportResult> {
+export async function importGradesCsv(csvContent: string, subjectSlug: "networks" | "javascript"): Promise<CsvImportResult> {
   const adminClient = createAdminClient();
   const result: CsvImportResult = { totalRows: 0, imported: 0, skipped: 0, errors: [] };
 
@@ -83,8 +101,19 @@ export async function importGradesCsv(csvContent: string): Promise<CsvImportResu
     return result;
   }
 
-  // Skip header row — detect and remove it
-  // The header might be in Arabic (الكود,الاسم,...) or English (code,name,...)
+  // Get the subject ID
+  const { data: subject, error: subjectError } = await adminClient
+    .from("grade_subjects")
+    .select("id")
+    .eq("slug", subjectSlug)
+    .single();
+
+  if (subjectError || !subject) {
+    result.errors.push(`Subject ${subjectSlug} not found in database.`);
+    return result;
+  }
+  const subjectId = subject.id;
+
   const headerLine = lines[0].toLowerCase();
   let startIndex = 0;
   if (
@@ -96,18 +125,12 @@ export async function importGradesCsv(csvContent: string): Promise<CsvImportResu
     startIndex = 1;
   }
 
-  // Handle multi-line header (the original CSV has a line break in the header)
-  // Check if line at startIndex looks like a continuation of header
   if (startIndex < lines.length) {
     const nextLine = lines[startIndex].toLowerCase();
-    if (
-      nextLine.startsWith("الفصل") ||
-      nextLine.match(/^\d+["']?\s*$/) // like: 10"
-    ) {
+    if (nextLine.startsWith("الفصل") || nextLine.match(/^\d+["']?\s*$/)) {
       startIndex++;
     }
   }
-  // Skip a third header line if it's just a number like "10"
   if (startIndex < lines.length) {
     const nextLine = lines[startIndex].trim();
     if (nextLine.match(/^\d+["']*$/)) {
@@ -118,23 +141,18 @@ export async function importGradesCsv(csvContent: string): Promise<CsvImportResu
   const dataLines = lines.slice(startIndex);
   result.totalRows = dataLines.length;
 
-  // Batch records for upsert
-  const records: { student_code: string; student_name: string; grade_value: number | null }[] = [];
-
   for (let i = 0; i < dataLines.length; i++) {
     const line = dataLines[i];
-    // Parse CSV — handle simple comma-separated values
-    // Fields: code, name, grade
     const parts = line.split(",");
+    
     if (parts.length < 2) {
-      result.errors.push(`Row ${i + 1}: Invalid format (expected at least 2 columns)`);
+      result.errors.push(`Row ${i + 1}: Invalid format`);
       result.skipped++;
       continue;
     }
 
     const code = parts[0].trim();
     const name = parts[1].trim();
-    const gradeStr = parts.length >= 3 ? parts[2].trim() : "";
 
     if (!code) {
       result.errors.push(`Row ${i + 1}: Missing student code`);
@@ -148,38 +166,62 @@ export async function importGradesCsv(csvContent: string): Promise<CsvImportResu
       continue;
     }
 
-    const gradeValue = gradeStr ? parseFloat(gradeStr) : null;
-    if (gradeStr && isNaN(gradeValue as number)) {
-      result.errors.push(`Row ${i + 1}: Invalid grade value "${gradeStr}"`);
+    let gradePart1: number | null = null;
+    let gradePart2: number | null = null;
+
+    if (subjectSlug === "networks") {
+      const gradeStr = parts.length >= 3 ? parts[2].trim() : "";
+      gradePart1 = gradeStr ? parseFloat(gradeStr) : null;
+      if (gradeStr && isNaN(gradePart1 as number)) {
+        result.errors.push(`Row ${i + 1}: Invalid grade value "${gradeStr}"`);
+        result.skipped++;
+        continue;
+      }
+    } else if (subjectSlug === "javascript") {
+      const g1Str = parts.length >= 3 ? parts[2].trim() : "";
+      const g2Str = parts.length >= 4 ? parts[3].trim() : "";
+      
+      gradePart1 = g1Str ? parseFloat(g1Str) : null;
+      if (g1Str && isNaN(gradePart1 as number)) {
+        result.errors.push(`Row ${i + 1}: Invalid oral grade "${g1Str}"`);
+        result.skipped++;
+        continue;
+      }
+      
+      gradePart2 = g2Str ? parseFloat(g2Str) : null;
+      if (g2Str && isNaN(gradePart2 as number)) {
+        result.errors.push(`Row ${i + 1}: Invalid midterm grade "${g2Str}"`);
+        result.skipped++;
+        continue;
+      }
+    }
+
+    // Upsert Student (DO NOTHING if exists, so Networks canonical name is preserved)
+    const { error: studentError } = await adminClient
+      .from("students")
+      .upsert({ student_code: code, canonical_name: name }, { onConflict: "student_code", ignoreDuplicates: true });
+      
+    if (studentError) {
+      result.errors.push(`Row ${i + 1}: Failed to save student - ${studentError.message}`);
       result.skipped++;
       continue;
     }
 
-    records.push({
-      student_code: code,
-      student_name: name,
-      grade_value: gradeValue,
-    });
-  }
+    // Upsert Grade Record
+    const { error: gradeError } = await adminClient
+      .from("subject_grade_records")
+      .upsert({
+        subject_id: subjectId,
+        student_code: code,
+        grade_part_1: gradePart1,
+        grade_part_2: gradePart2
+      }, { onConflict: "subject_id,student_code" });
 
-  if (records.length === 0) {
-    result.errors.push("No valid records to import");
-    return result;
-  }
-
-  // Upsert in batches of 100
-  const batchSize = 100;
-  for (let i = 0; i < records.length; i += batchSize) {
-    const batch = records.slice(i, i + batchSize);
-    const { error } = await adminClient
-      .from("grade_records")
-      .upsert(batch, { onConflict: "student_code" });
-
-    if (error) {
-      result.errors.push(`Batch ${Math.floor(i / batchSize) + 1}: ${error.message}`);
-      result.skipped += batch.length;
+    if (gradeError) {
+      result.errors.push(`Row ${i + 1}: Failed to save grades - ${gradeError.message}`);
+      result.skipped++;
     } else {
-      result.imported += batch.length;
+      result.imported++;
     }
   }
 
@@ -193,9 +235,9 @@ export async function getAllGradeRecords() {
   const adminClient = createAdminClient();
 
   const { data, error } = await adminClient
-    .from("grade_records")
-    .select("*, user_grade_links(user_id)")
-    .order("student_name", { ascending: true });
+    .from("students")
+    .select("*, subject_grade_records(*, grade_subjects(slug)), user_grade_links(user_id)")
+    .order("canonical_name", { ascending: true });
 
   if (error) throw new Error(error.message);
   return data;

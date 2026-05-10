@@ -17,7 +17,7 @@ export async function getMyGradeAction() {
 /**
  * Admin action to import CSV grades.
  */
-export async function importGradesCsvAction(csvContent: string) {
+export async function importGradesCsvAction(csvContent: string, subjectSlug: "networks" | "javascript" = "networks") {
   await requireAdmin();
 
   if (!csvContent || csvContent.trim().length === 0) {
@@ -25,7 +25,7 @@ export async function importGradesCsvAction(csvContent: string) {
   }
 
   try {
-    const result = await importGradesCsv(csvContent);
+    const result = await importGradesCsv(csvContent, subjectSlug);
     revalidatePath("/admin");
     return { result };
   } catch (e: unknown) {
@@ -88,7 +88,7 @@ export async function linkMyStudentCodeAction(formData: FormData) {
   );
 
   const { data: initialGradeRecord, error: gradeRecordError } = await adminClient
-    .from("grade_records")
+    .from("students")
     .select("student_code")
     .in("student_code", candidateCodes)
     .single();
@@ -102,7 +102,7 @@ export async function linkMyStudentCodeAction(formData: FormData) {
     const codeDigits = digitsOnly(normalizedStudentCode);
     if (codeDigits) {
       const { data: possibleMatches, error: possibleMatchesError } = await adminClient
-        .from("grade_records")
+        .from("students")
         .select("student_code")
         .ilike("student_code", `%${codeDigits}%`)
         .limit(20);

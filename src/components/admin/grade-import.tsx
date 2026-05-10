@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { importGradesCsvAction } from "@/actions/grade.actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Upload, FileText, CheckCircle, AlertCircle, Loader2, X } from "lucide-react";
 
 interface ImportResult {
@@ -15,6 +16,7 @@ interface ImportResult {
 
 export function GradeCsvImport() {
   const [file, setFile] = useState<File | null>(null);
+  const [subjectSlug, setSubjectSlug] = useState<"networks" | "javascript">("networks");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -48,7 +50,7 @@ export function GradeCsvImport() {
 
     try {
       const text = await file.text();
-      const response = await importGradesCsvAction(text);
+      const response = await importGradesCsvAction(text, subjectSlug);
 
       if (response.error) {
         setError(response.error);
@@ -71,6 +73,20 @@ export function GradeCsvImport() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Subject selector */}
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-zinc-300">Target Subject</label>
+          <Select value={subjectSlug} onValueChange={(val: any) => setSubjectSlug(val)}>
+            <SelectTrigger className="w-full bg-zinc-800/50 border-zinc-700 text-zinc-200">
+              <SelectValue placeholder="Select subject" />
+            </SelectTrigger>
+            <SelectContent className="bg-zinc-800 border-zinc-700">
+              <SelectItem value="networks" className="text-zinc-200 focus:bg-zinc-700 focus:text-white cursor-pointer">Networks</SelectItem>
+              <SelectItem value="javascript" className="text-zinc-200 focus:bg-zinc-700 focus:text-white cursor-pointer">JavaScript</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         {/* Drop zone */}
         <div
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}

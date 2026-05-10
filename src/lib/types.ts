@@ -71,11 +71,25 @@ export interface UserWithWorkspace extends Profile {
   storage_usage?: StorageUsage;
 }
 
-export interface GradeRecord {
+export interface StudentRecord {
   id: string;
   student_code: string;
-  student_name: string;
-  grade_value: number | null;
+  canonical_name: string;
+  created_at: string;
+}
+
+export interface GradeSubject {
+  id: string;
+  slug: string;
+  name: string;
+}
+
+export interface SubjectGradeRecord {
+  id: string;
+  subject_id: string;
+  student_code: string;
+  grade_part_1: number | null;
+  grade_part_2: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -87,8 +101,15 @@ export interface UserGradeLink {
   created_at: string;
 }
 
+export interface UserSubjectGrade {
+  subject_slug: string;
+  subject_name: string;
+  grade_part_1: number | null;
+  grade_part_2: number | null;
+}
+
 export interface UserGradeData {
   student_code: string;
-  student_name: string;
-  grade_value: number | null;
+  canonical_name: string;
+  subjects: UserSubjectGrade[];
 }
