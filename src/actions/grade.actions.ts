@@ -17,15 +17,19 @@ export async function getMyGradeAction() {
 /**
  * Admin action to import CSV grades.
  */
-export async function importGradesCsvAction(csvContent: string, subjectSlug: "networks" | "javascript" = "networks") {
+export async function importGradesCsvAction(csvContent: string, subjectName: string) {
   await requireAdmin();
 
   if (!csvContent || csvContent.trim().length === 0) {
     return { error: "CSV content is empty" };
   }
 
+  if (!subjectName || subjectName.trim().length === 0) {
+    return { error: "Subject name is required" };
+  }
+
   try {
-    const result = await importGradesCsv(csvContent, subjectSlug);
+    const result = await importGradesCsv(csvContent, subjectName);
     revalidatePath("/admin");
     return { result };
   } catch (e: unknown) {

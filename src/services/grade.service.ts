@@ -32,7 +32,7 @@ export async function getUserGradeData(userId: string): Promise<UserGradeData | 
   // Then, get all their subject grades
   const { data: grades, error: gradesError } = await supabase
     .from("subject_grade_records")
-    .select("grade_part_1, grade_part_2, grade_subjects(slug, name)")
+    .select("grade_part_1, grade_part_2, grade_part_3, grade_part_4, grade_subjects(slug, name)")
     .eq("student_code", link.student_code);
 
   if (gradesError) return null;
@@ -43,6 +43,8 @@ export async function getUserGradeData(userId: string): Promise<UserGradeData | 
     subject_name: g.grade_subjects.name,
     grade_part_1: g.grade_part_1,
     grade_part_2: g.grade_part_2,
+    grade_part_3: g.grade_part_3,
+    grade_part_4: g.grade_part_4,
   }));
 
   return {
@@ -86,64 +88,102 @@ export interface CsvImportResult {
  * Import CSV grade data into the subject_grade_records table.
  * Admin-only operation using the service role client.
  */
-export async function importGradesCsv(csvContent: string, subjectSlug: "networks" | "javascript"): Promise<CsvImportResult> {
+export async function importGradesCsv(csvContent: string, subjectName: string): Promise<CsvImportResult> {
   const adminClient = createAdminClient();
   const result: CsvImportResult = { totalRows: 0, imported: 0, skipped: 0, errors: [] };
 
-  // Parse CSV lines
-  const lines = csvContent
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line.length > 0);
+  const parsedName = subjectName.trim();
+  if (!parsedName) {
+    result.errors.push("Subject name is required");
+    return result;
+  }
+  
+  const subjectSlug = parsedName.toLowerCase().replace(/[^a-z0-9\u0600-\u06FF]+/g, '-').replace(/^-|-$/g, '');
 
-  if (lines.length < 2) {
+  // Parse CSV lines robustly (handles quotes and newlines)
+  const lines = csvContent.split(/\r?\n/);
+  const rows: string[][] = [];
+  let insideQuote = false;
+  let currentRow: string[] = [];
+  let currentEntry = '';
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    for (let j = 0; j < line.length; j++) {
+      const char = line[j];
+      if (char === '"') {
+        insideQuote = !insideQuote;
+      } else if (char === ',' && !insideQuote) {
+        currentRow.push(currentEntry.trim());
+        currentEntry = '';
+      } else {
+        currentEntry += char;
+      }
+    }
+    
+    if (!insideQuote) {
+      currentRow.push(currentEntry.trim());
+      if (currentRow.some(col => col.length > 0)) {
+        rows.push(currentRow);
+      }
+      currentRow = [];
+      currentEntry = '';
+    } else {
+      currentEntry += '\\n'; // Embed newline if inside quote across lines
+    }
+  }
+
+  if (rows.length < 2) {
     result.errors.push("CSV file is empty or has no data rows");
     return result;
   }
 
-  // Get the subject ID
-  const { data: subject, error: subjectError } = await adminClient
+  // Get or insert the subject
+  let { data: subject, error: subjectError } = await adminClient
     .from("grade_subjects")
     .select("id")
     .eq("slug", subjectSlug)
     .single();
 
   if (subjectError || !subject) {
-    result.errors.push(`Subject ${subjectSlug} not found in database.`);
-    return result;
+    // Attempt to create it
+    const { data: newSubject, error: insertError } = await adminClient
+      .from("grade_subjects")
+      .insert({ slug: subjectSlug, name: parsedName })
+      .select("id")
+      .single();
+      
+    if (insertError || !newSubject) {
+      result.errors.push(`Failed to create subject ${parsedName}: ${insertError?.message}`);
+      return result;
+    }
+    subject = newSubject;
   }
   const subjectId = subject.id;
 
-  const headerLine = lines[0].toLowerCase();
   let startIndex = 0;
+  const headerRow = rows[0].join(" ").toLowerCase();
   if (
-    headerLine.includes("كود") ||
-    headerLine.includes("code") ||
-    headerLine.includes("اسم") ||
-    headerLine.includes("name")
+    headerRow.includes("كود") ||
+    headerRow.includes("code") ||
+    headerRow.includes("اسم") ||
+    headerRow.includes("name")
   ) {
     startIndex = 1;
   }
 
-  if (startIndex < lines.length) {
-    const nextLine = lines[startIndex].toLowerCase();
-    if (nextLine.startsWith("الفصل") || nextLine.match(/^\d+["']?\s*$/)) {
-      startIndex++;
-    }
-  }
-  if (startIndex < lines.length) {
-    const nextLine = lines[startIndex].trim();
-    if (nextLine.match(/^\d+["']*$/)) {
+  if (startIndex < rows.length) {
+    const nextRow = rows[startIndex].join(" ").toLowerCase();
+    if (nextRow.startsWith("الفصل") || nextRow.match(/^\d+["']?\s*$/)) {
       startIndex++;
     }
   }
 
-  const dataLines = lines.slice(startIndex);
-  result.totalRows = dataLines.length;
+  const dataRows = rows.slice(startIndex);
+  result.totalRows = dataRows.length;
 
-  for (let i = 0; i < dataLines.length; i++) {
-    const line = dataLines[i];
-    const parts = line.split(",");
+  for (let i = 0; i < dataRows.length; i++) {
+    const parts = dataRows[i];
     
     if (parts.length < 2) {
       result.errors.push(`Row ${i + 1}: Invalid format`);
@@ -151,8 +191,8 @@ export async function importGradesCsv(csvContent: string, subjectSlug: "networks
       continue;
     }
 
-    const code = parts[0].trim();
-    const name = parts[1].trim();
+    const code = parts[0].replace(/^["']+|["']+$/g, "").trim();
+    const name = parts[1].replace(/^["']+|["']+$/g, "").trim();
 
     if (!code) {
       result.errors.push(`Row ${i + 1}: Missing student code`);
@@ -166,37 +206,13 @@ export async function importGradesCsv(csvContent: string, subjectSlug: "networks
       continue;
     }
 
-    let gradePart1: number | null = null;
-    let gradePart2: number | null = null;
+    // Oral, Midterm, Practical, Coursework
+    const gradePart1 = parts.length >= 3 && parts[2].trim() ? parts[2].trim() : "(لم تظهر بعد)";
+    const gradePart2 = parts.length >= 4 && parts[3].trim() ? parts[3].trim() : "(لم تظهر بعد)";
+    const gradePart3 = parts.length >= 5 && parts[4].trim() ? parts[4].trim() : "(لم تظهر بعد)";
+    const gradePart4 = parts.length >= 6 && parts[5].trim() ? parts[5].trim() : "(لم تظهر بعد)";
 
-    if (subjectSlug === "networks") {
-      const gradeStr = parts.length >= 3 ? parts[2].trim() : "";
-      gradePart1 = gradeStr ? parseFloat(gradeStr) : null;
-      if (gradeStr && isNaN(gradePart1 as number)) {
-        result.errors.push(`Row ${i + 1}: Invalid grade value "${gradeStr}"`);
-        result.skipped++;
-        continue;
-      }
-    } else if (subjectSlug === "javascript") {
-      const g1Str = parts.length >= 3 ? parts[2].trim() : "";
-      const g2Str = parts.length >= 4 ? parts[3].trim() : "";
-      
-      gradePart1 = g1Str ? parseFloat(g1Str) : null;
-      if (g1Str && isNaN(gradePart1 as number)) {
-        result.errors.push(`Row ${i + 1}: Invalid oral grade "${g1Str}"`);
-        result.skipped++;
-        continue;
-      }
-      
-      gradePart2 = g2Str ? parseFloat(g2Str) : null;
-      if (g2Str && isNaN(gradePart2 as number)) {
-        result.errors.push(`Row ${i + 1}: Invalid midterm grade "${g2Str}"`);
-        result.skipped++;
-        continue;
-      }
-    }
-
-    // Upsert Student (DO NOTHING if exists, so Networks canonical name is preserved)
+    // Upsert Student (DO NOTHING if exists, so canonical name is preserved)
     const { error: studentError } = await adminClient
       .from("students")
       .upsert({ student_code: code, canonical_name: name }, { onConflict: "student_code", ignoreDuplicates: true });
@@ -214,7 +230,9 @@ export async function importGradesCsv(csvContent: string, subjectSlug: "networks
         subject_id: subjectId,
         student_code: code,
         grade_part_1: gradePart1,
-        grade_part_2: gradePart2
+        grade_part_2: gradePart2,
+        grade_part_3: gradePart3,
+        grade_part_4: gradePart4
       }, { onConflict: "subject_id,student_code" });
 
     if (gradeError) {
