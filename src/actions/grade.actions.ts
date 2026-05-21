@@ -1,7 +1,7 @@
 "use server";
 
 import { requireAdmin, requireAuthWithProfile } from "@/services/auth.service";
-import { getUserGradeData, importGradesCsv, getAllGradeRecords, claimStudentCode } from "@/services/grade.service";
+import { getUserGradeData, importGradesCsv, getAllGradeRecords, claimStudentCode, getAllSubjects, deleteSubject } from "@/services/grade.service";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { revalidatePath } from "next/cache";
 
@@ -47,6 +47,34 @@ export async function getAllGradeRecordsAction() {
     return { records };
   } catch (e: unknown) {
     return { error: e instanceof Error ? e.message : "Failed to fetch records" };
+  }
+}
+
+/**
+ * Admin action to get all subjects.
+ */
+export async function getAllSubjectsAction() {
+  await requireAdmin();
+  try {
+    const subjects = await getAllSubjects();
+    return { subjects };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Failed to fetch subjects" };
+  }
+}
+
+/**
+ * Admin action to delete a subject.
+ */
+export async function deleteSubjectAction(subjectId: string) {
+  await requireAdmin();
+  try {
+    await deleteSubject(subjectId);
+    revalidatePath("/admin");
+    revalidatePath("/grades");
+    return { success: true };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Failed to delete subject" };
   }
 }
 

@@ -10,6 +10,8 @@ import { Users, FolderOpen, Activity, ExternalLink, GraduationCap } from "lucide
 import { ToggleActiveButton } from "@/components/admin/toggle-active-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import { GradeCsvImport } from "@/components/admin/grade-import";
+import { DeleteSubjectButton } from "@/components/admin/delete-subject-button";
+import { getAllSubjectsAction } from "@/actions/grade.actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
@@ -34,14 +36,16 @@ function formatAction(action: string) {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [usersResult, activityResult, storageUsage] = await Promise.all([
+  const [usersResult, activityResult, storageUsage, subjectsResult] = await Promise.all([
     getAllUsersAction(),
     getAllActivityAction(50),
     getStorageUsageByUser(),
+    getAllSubjectsAction(),
   ]);
 
   const users = usersResult.users || [];
   const activities = activityResult.activities || [];
+  const subjects = subjectsResult.subjects || [];
   const storageMap = new Map(storageUsage.map((s) => [s.user_id, s]));
 
   return (
@@ -197,6 +201,44 @@ export default async function AdminPage() {
         <TabsContent value="grades">
           <div className="space-y-6">
             <GradeCsvImport />
+            
+            <Card className="border-zinc-800 bg-zinc-900/50">
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-zinc-800 hover:bg-transparent">
+                      <TableHead className="text-zinc-400">Subject Name</TableHead>
+                      <TableHead className="text-zinc-400">Subject Slug</TableHead>
+                      <TableHead className="text-zinc-400 text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {subjects.length === 0 ? (
+                      <TableRow className="border-zinc-800">
+                        <TableCell colSpan={3} className="text-center text-zinc-500 py-6">
+                          No subjects imported yet.
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      subjects.map((subject: any) => (
+                        <TableRow key={subject.id} className="border-zinc-800">
+                          <TableCell className="text-zinc-200 font-medium">
+                            <div className="flex items-center gap-2">
+                              <GraduationCap className="h-4 w-4 text-amber-500" />
+                              {subject.name}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-zinc-400 text-sm">{subject.slug}</TableCell>
+                          <TableCell className="text-right">
+                            <DeleteSubjectButton subjectId={subject.id} subjectName={subject.name} />
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </div>
         </TabsContent>
       </Tabs>
