@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { importGradesCsvAction } from "@/actions/grade.actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 import { Upload, FileText, CheckCircle, AlertCircle, Loader2, X } from "lucide-react";
 
 interface ImportResult {
@@ -16,7 +16,7 @@ interface ImportResult {
 
 export function GradeCsvImport() {
   const [file, setFile] = useState<File | null>(null);
-  const [subjectSlug, setSubjectSlug] = useState<"networks" | "javascript">("networks");
+  const [subjectName, setSubjectName] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +50,7 @@ export function GradeCsvImport() {
 
     try {
       const text = await file.text();
-      const response = await importGradesCsvAction(text, subjectSlug);
+      const response = await importGradesCsvAction(text, subjectName);
 
       if (response.error) {
         setError(response.error);
@@ -76,15 +76,12 @@ export function GradeCsvImport() {
         {/* Subject selector */}
         <div className="space-y-2">
           <label className="text-sm font-medium text-zinc-300">Target Subject</label>
-          <Select value={subjectSlug} onValueChange={(val: any) => setSubjectSlug(val)}>
-            <SelectTrigger className="w-full bg-zinc-800/50 border-zinc-700 text-zinc-200">
-              <SelectValue placeholder="Select subject" />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-800 border-zinc-700">
-              <SelectItem value="networks" className="text-zinc-200 focus:bg-zinc-700 focus:text-white cursor-pointer">Networks</SelectItem>
-              <SelectItem value="javascript" className="text-zinc-200 focus:bg-zinc-700 focus:text-white cursor-pointer">JavaScript</SelectItem>
-            </SelectContent>
-          </Select>
+          <Input 
+            value={subjectName} 
+            onChange={(e) => setSubjectName(e.target.value)}
+            placeholder="e.g. Data Structures"
+            className="w-full bg-zinc-800/50 border-zinc-700 text-zinc-200"
+          />
         </div>
 
         {/* Drop zone */}
@@ -142,7 +139,7 @@ export function GradeCsvImport() {
         {/* Import button */}
         <Button
           onClick={handleImport}
-          disabled={!file || loading}
+          disabled={!file || loading || !subjectName.trim()}
           className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white shadow-lg shadow-amber-500/20 disabled:opacity-50"
         >
           {loading ? (

@@ -7,8 +7,7 @@ export default async function GradesPage() {
   const { user } = await requireAuthWithProfile();
   const gradeData = await getUserGradeData(user.id);
 
-  const networksGrade = gradeData?.subjects.find(s => s.subject_slug === "networks");
-  const jsGrade = gradeData?.subjects.find(s => s.subject_slug === "javascript");
+
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto">
@@ -59,67 +58,52 @@ export default async function GradesPage() {
           </Card>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Networks Card */}
-            <Card className="border-zinc-800 bg-zinc-900/50 overflow-hidden flex flex-col h-full">
-              <div className="h-1.5 bg-gradient-to-r from-amber-500 to-orange-500" />
-              <CardHeader className="pb-4 pt-6">
-                <CardTitle className="text-lg text-zinc-200 flex items-center gap-2">
-                  <BookOpen className="h-5 w-5 text-amber-400" />
-                  Networks
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col justify-center">
-                {networksGrade ? (
-                  <div className="flex flex-col items-center justify-center py-6">
-                    <p className="text-sm font-medium text-zinc-500 uppercase tracking-wider mb-3">Total Grade</p>
-                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 flex items-center justify-center mb-2">
-                      <p className="text-4xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent">
-                        {networksGrade.grade_part_1 ?? "N/A"}
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Award className="h-8 w-8 text-zinc-600 mx-auto mb-3" />
-                    <p className="text-zinc-400 text-sm">No grades recorded for Networks yet.</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* JavaScript Card */}
-            <Card className="border-zinc-800 bg-zinc-900/50 overflow-hidden flex flex-col h-full">
-              <div className="h-1.5 bg-gradient-to-r from-yellow-400 to-yellow-600" />
-              <CardHeader className="pb-4 pt-6">
-                <CardTitle className="text-lg text-zinc-200 flex items-center gap-2">
-                  <Code className="h-5 w-5 text-yellow-400" />
-                  JavaScript
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 flex flex-col justify-center">
-                {jsGrade ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 rounded-xl bg-zinc-800/40 border border-zinc-800">
+            {gradeData.subjects.map((subject, index) => (
+              <Card key={index} className="border-zinc-800 bg-zinc-900/50 overflow-hidden flex flex-col h-full">
+                <div className={`h-1.5 ${index % 2 === 0 ? "bg-gradient-to-r from-amber-500 to-orange-500" : "bg-gradient-to-r from-emerald-400 to-emerald-600"}`} />
+                <CardHeader className="pb-4 pt-6">
+                  <CardTitle className="text-lg text-zinc-200 flex items-center gap-2">
+                    <BookOpen className={`h-5 w-5 ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`} />
+                    {subject.subject_name}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex-1 flex flex-col justify-center">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/40 border border-zinc-800">
                       <span className="text-sm font-medium text-zinc-400">Oral</span>
-                      <span className="text-2xl font-bold text-yellow-400">
-                        {jsGrade.grade_part_1 ?? "N/A"}
+                      <span className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                        {subject.grade_part_1 || "N/A"}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between p-4 rounded-xl bg-zinc-800/40 border border-zinc-800">
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/40 border border-zinc-800">
                       <span className="text-sm font-medium text-zinc-400">Midterm</span>
-                      <span className="text-2xl font-bold text-yellow-400">
-                        {jsGrade.grade_part_2 ?? "N/A"}
+                      <span className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                        {subject.grade_part_2 || "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/40 border border-zinc-800">
+                      <span className="text-sm font-medium text-zinc-400">Practical</span>
+                      <span className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                        {subject.grade_part_3 || "N/A"}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/40 border border-zinc-800">
+                      <span className="text-sm font-medium text-zinc-400">Coursework</span>
+                      <span className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                        {subject.grade_part_4 || "N/A"}
                       </span>
                     </div>
                   </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <Award className="h-8 w-8 text-zinc-600 mx-auto mb-3" />
-                    <p className="text-zinc-400 text-sm">No grades recorded for JavaScript yet.</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            ))}
+            
+            {gradeData.subjects.length === 0 && (
+              <div className="col-span-full text-center py-8">
+                <Award className="h-8 w-8 text-zinc-600 mx-auto mb-3" />
+                <p className="text-zinc-400 text-sm">No grades recorded for any subject yet.</p>
+              </div>
+            )}
           </div>
         </div>
       ) : (

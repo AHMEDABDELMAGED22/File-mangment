@@ -88,8 +88,10 @@ export interface SubjectGradeRecord {
   id: string;
   subject_id: string;
   student_code: string;
-  grade_part_1: number | null;
-  grade_part_2: number | null;
+  grade_part_1: string | null;
+  grade_part_2: string | null;
+  grade_part_3: string | null;
+  grade_part_4: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -104,8 +106,10 @@ export interface UserGradeLink {
 export interface UserSubjectGrade {
   subject_slug: string;
   subject_name: string;
-  grade_part_1: number | null;
-  grade_part_2: number | null;
+  grade_part_1: string | null;
+  grade_part_2: string | null;
+  grade_part_3: string | null;
+  grade_part_4: string | null;
 }
 
 export interface UserGradeData {
