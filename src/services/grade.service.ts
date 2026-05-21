@@ -260,3 +260,33 @@ export async function getAllGradeRecords() {
   if (error) throw new Error(error.message);
   return data;
 }
+
+/**
+ * Get all subjects. Admin-only.
+ */
+export async function getAllSubjects() {
+  const adminClient = createAdminClient();
+
+  const { data, error } = await adminClient
+    .from("grade_subjects")
+    .select("*")
+    .order("name", { ascending: true });
+
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+/**
+ * Delete a subject. Admin-only.
+ */
+export async function deleteSubject(subjectId: string) {
+  const adminClient = createAdminClient();
+
+  const { error } = await adminClient
+    .from("grade_subjects")
+    .delete()
+    .eq("id", subjectId);
+
+  if (error) throw new Error(error.message);
+  return true;
+}
