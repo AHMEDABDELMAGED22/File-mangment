@@ -55,6 +55,15 @@ export default function ResetPasswordPage() {
             <SubmitButton />
           </form>
         )}
+
+        <div className="mt-6 p-3 rounded-lg border border-amber-500/20 bg-amber-500/5 text-amber-300 text-xs leading-relaxed space-y-1">
+          <p className="font-semibold flex items-center gap-1.5 text-amber-400">
+            💡 ملحوظة مهمة:
+          </p>
+          <p>
+            يا ريت تفتح رابط تغيير الباسورد من نفس الجهاز ونفس المتصفح اللي طلبت منه، وتأكد إنك تدوس على آخر إيميل مبعوتلك بس عشان اللينك يشتغل معاك صح.
+          </p>
+        </div>
       </CardContent>
       <CardFooter className="justify-center">
         <Link href="/login" className="text-sm text-zinc-400 hover:text-zinc-300 flex items-center gap-1 transition-colors">
