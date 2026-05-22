@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { loginSchema, signupSchema, resetPasswordSchema, updatePasswordSchema, updateProfileSchema } from "@/lib/validators/auth";
 
 function normalizeStudentCodeInput(code: string): string {
@@ -146,7 +147,11 @@ export async function resetPassword(formData: FormData) {
   const parsed = resetPasswordSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const supabase = await createClient();
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const headersList = await headers();
+  const host = headersList.get("host");
+  const protocol = headersList.get("x-forwarded-proto") || "http";
+  const origin = host ? `${protocol}://${host}` : (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000");
+
   const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: `${origin}/auth/callback?next=/update-password`,
   });
