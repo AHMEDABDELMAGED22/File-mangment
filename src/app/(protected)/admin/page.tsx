@@ -14,6 +14,7 @@ import { DeleteSubjectButton } from "@/components/admin/delete-subject-button";
 import { getAllSubjectsAction } from "@/actions/grade.actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { UsersTable } from "@/components/admin/users-table";
 
 function formatSize(bytes: number) {
   if (bytes === 0) return "0 B";
@@ -101,72 +102,7 @@ export default async function AdminPage() {
         </TabsList>
 
         <TabsContent value="users">
-          <Card className="border-zinc-800 bg-zinc-900/50">
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow className="border-zinc-800 hover:bg-transparent">
-                    <TableHead className="text-zinc-400">Name</TableHead>
-                    <TableHead className="text-zinc-400">Role</TableHead>
-                    <TableHead className="text-zinc-400">Status</TableHead>
-                    <TableHead className="text-zinc-400">Storage</TableHead>
-                    <TableHead className="text-zinc-400">Joined</TableHead>
-                    <TableHead className="text-zinc-400 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {users.map((user: Profile) => {
-                    const usage = storageMap.get(user.id);
-                    return (
-                      <TableRow key={user.id} className="border-zinc-800">
-                        <TableCell className="text-zinc-200 font-medium">{user.full_name || "—"}</TableCell>
-                        <TableCell>
-                          <Badge variant={user.role === "admin" ? "default" : "secondary"} className={user.role === "admin" ? "bg-violet-500/20 text-violet-400 border-violet-500/30" : "bg-zinc-700 text-zinc-300"}>
-                            {user.role}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={user.is_active ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" : "bg-red-500/20 text-red-400 border-red-500/30"}>
-                            {user.is_active ? "Active" : "Inactive"}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-zinc-400 text-sm">
-                          {usage ? `${formatSize(usage.total_bytes)} (${usage.file_count} files)` : "0 B"}
-                        </TableCell>
-                        <TableCell className="text-zinc-500 text-sm">{new Date(user.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            {(() => {
-                              const u = user as any;
-                              // Handle both array and object responses from Supabase join
-                              const wsId = u.workspaces?.id || u.workspaces?.[0]?.id;
-                              
-                              if (wsId) {
-                                return (
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    className="h-8 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
-                                    render={<Link href={`/workspace/${wsId}`} />}
-                                  >
-                                    <ExternalLink className="h-4 w-4 mr-2" />
-                                    View Files
-                                  </Button>
-                                );
-                              }
-                              return null;
-                            })()}
-                            <ToggleActiveButton userId={user.id} isActive={user.is_active} />
-                            <DeleteUserButton userId={user.id} userName={user.full_name || "Unknown"} disabled={user.role === "admin"} />
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+          <UsersTable users={users} storageUsage={storageUsage} />
         </TabsContent>
 
         <TabsContent value="activity">
