@@ -146,7 +146,10 @@ export async function resetPassword(formData: FormData) {
   const parsed = resetPasswordSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const supabase = await createClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email);
+  const origin = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${origin}/auth/callback?next=/update-password`,
+  });
   if (error) return { error: error.message };
   return { success: "Check your email for a password reset link." };
 }
