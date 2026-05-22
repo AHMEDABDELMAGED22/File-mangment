@@ -1,5 +1,5 @@
 import { requireAdmin } from "@/services/auth.service";
-import { getAllUsersAction, getAllActivityAction } from "@/actions/admin.actions";
+import { getAllUsersAction, getAllActivityAction, getAllUploadedFilesAction } from "@/actions/admin.actions";
 import { getStorageUsageByUser } from "@/services/file.service";
 import type { Profile, ActivityLog } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -37,17 +37,19 @@ function formatAction(action: string) {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [usersResult, activityResult, storageUsage, subjectsResult] = await Promise.all([
+  const [usersResult, activityResult, storageUsage, subjectsResult, filesResult] = await Promise.all([
     getAllUsersAction(),
     getAllActivityAction(50),
     getStorageUsageByUser(),
     getAllSubjectsAction(),
+    getAllUploadedFilesAction(),
   ]);
 
   const users = usersResult.users || [];
   const activities = activityResult.activities || [];
   const subjects = subjectsResult.subjects || [];
   const storageMap = new Map(storageUsage.map((s) => [s.user_id, s]));
+  const allFiles = filesResult.files || [];
 
   return (
     <div className="space-y-6">
@@ -102,7 +104,7 @@ export default async function AdminPage() {
         </TabsList>
 
         <TabsContent value="users">
-          <UsersTable users={users} storageUsage={storageUsage} />
+          <UsersTable users={users} storageUsage={storageUsage} allFiles={allFiles} />
         </TabsContent>
 
         <TabsContent value="activity">
