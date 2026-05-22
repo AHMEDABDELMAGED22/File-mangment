@@ -68,7 +68,7 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
 
     try {
       // CSV Header
-      const csvRows: string[] = ["User Name,File Name,File Size,Upload Date"];
+      const csvRows: string[] = ["Student Code,User Name,File Name,File Size,Upload Date"];
 
       // Sort uploaders alphabetically
       const sortedUploaders = [...uploaders].sort((a, b) =>
@@ -78,19 +78,24 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
       for (const user of sortedUploaders) {
         const files = userFilesMap.get(user.id) || [];
         const userName = (user.full_name || "Unknown").replace(/,/g, " ");
+        const studentCode = (user.student_code || "—").replace(/,/g, " ");
 
         if (files.length === 0) {
-          csvRows.push(`"${userName}","No files","",""`);
+          csvRows.push(`"${studentCode}","${userName}","No files","",""`);
         } else {
           // Sort files by date (newest first)
           const sortedFiles = [...files].sort(
             (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
+          let isFirst = true;
           for (const file of sortedFiles) {
             const fileName = file.name.replace(/"/g, '""');
             const fileSize = formatSize(file.size_bytes);
             const uploadDate = new Date(file.created_at).toLocaleString();
-            csvRows.push(`"${userName}","${fileName}","${fileSize}","${uploadDate}"`);
+            const currentCode = isFirst ? studentCode : "";
+            const currentName = isFirst ? userName : "";
+            csvRows.push(`"${currentCode}","${currentName}","${fileName}","${fileSize}","${uploadDate}"`);
+            isFirst = false;
           }
         }
       }
@@ -121,8 +126,9 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
     .filter((user) => {
       // 1. Search Query filter
       const name = (user.full_name || "").toLowerCase();
+      const code = (user.student_code || "").toLowerCase();
       const query = searchQuery.toLowerCase();
-      const matchesSearch = name.includes(query);
+      const matchesSearch = name.includes(query) || code.includes(query);
 
       // 2. Uploaders filter
       const usage = storageMap.get(user.id);
@@ -157,7 +163,7 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
         <div className="flex-1 max-w-md relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
           <Input
-            placeholder="Search users by name..."
+            placeholder="Search users by name or code..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 bg-zinc-950/40 border-zinc-800 text-white placeholder:text-zinc-500 focus:border-violet-500 focus:ring-violet-500/20"
@@ -207,6 +213,7 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
         <Table>
           <TableHeader>
             <TableRow className="border-zinc-800 hover:bg-transparent bg-zinc-900/20">
+              <TableHead className="text-zinc-400">Code</TableHead>
               <TableHead 
                 className="text-zinc-400 cursor-pointer select-none hover:text-white transition-colors"
                 onClick={toggleSort}
@@ -228,7 +235,7 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
           <TableBody>
             {filteredUsers.length === 0 ? (
               <TableRow className="border-zinc-800">
-                <TableCell colSpan={6} className="text-center py-8 text-zinc-500">
+                <TableCell colSpan={7} className="text-center py-8 text-zinc-500">
                   No users found matching the filters.
                 </TableCell>
               </TableRow>
@@ -237,6 +244,9 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
                 const usage = storageMap.get(user.id);
                 return (
                   <TableRow key={user.id} className="border-zinc-800 hover:bg-zinc-800/10">
+                    <TableCell className="text-zinc-400 font-mono text-xs">
+                      {user.student_code || "—"}
+                    </TableCell>
                     <TableCell className="text-zinc-200 font-medium">
                       <span className="text-white">{user.full_name || "—"}</span>
                     </TableCell>
