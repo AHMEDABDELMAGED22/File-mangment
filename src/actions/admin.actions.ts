@@ -8,9 +8,26 @@ import { revalidatePath } from "next/cache";
 export async function getAllUsersAction() {
   await requireAdmin();
   const supabase = await createClient();
-  const { data, error } = await supabase.from("profiles").select("*, workspaces(id, name)").order("created_at", { ascending: false });
+  
+  const { data: users, error } = await supabase
+    .from("profiles")
+    .select("*, workspaces(id, name)")
+    .order("created_at", { ascending: false });
+    
   if (error) return { error: error.message };
-  return { users: data };
+
+  const { data: links, error: linksError } = await supabase
+    .from("user_grade_links")
+    .select("user_id, student_code");
+
+  const linksMap = new Map((links || []).map((link) => [link.user_id, link.student_code]));
+
+  const usersWithCode = (users || []).map((user) => ({
+    ...user,
+    student_code: linksMap.get(user.id) || null,
+  }));
+
+  return { users: usersWithCode };
 }
 
 export async function toggleUserActiveAction(formData: FormData) {
