@@ -48,3 +48,14 @@ export async function deleteUserAction(formData: FormData) {
     return { error: e instanceof Error ? e.message : "Failed to delete user" };
   }
 }
+
+export async function getAllUploadedFilesAction() {
+  await requireAdmin();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("files")
+    .select("owner_id, name, size_bytes, created_at")
+    .order("created_at", { ascending: false });
+  if (error) return { error: error.message };
+  return { files: data };
+}

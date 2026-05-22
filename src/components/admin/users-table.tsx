@@ -13,7 +13,7 @@ import {
   ArrowUpDown, 
   ArrowUp, 
   ArrowDown, 
-  Copy, 
+  FileDown, 
   Check, 
   Users, 
   HardDriveUpload, 
@@ -25,6 +25,7 @@ import { toast } from "sonner";
 interface Props {
   users: Profile[];
   storageUsage: { user_id: string; total_bytes: number; file_count: number }[];
+  allFiles: { owner_id: string; name: string; size_bytes: number; created_at: string }[];
 }
 
 function formatSize(bytes: number) {
@@ -35,11 +36,11 @@ function formatSize(bytes: number) {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
 }
 
-export function UsersTable({ users, storageUsage }: Props) {
+export function UsersTable({ users, storageUsage, allFiles }: Props) {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "none">("asc"); // Default to alphabetical A-Z
   const [onlyUploaders, setOnlyUploaders] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [exporting, setExporting] = useState(false);
 
   const storageMap = new Map(storageUsage.map((s) => [s.user_id, s]));
 
@@ -49,17 +50,70 @@ export function UsersTable({ users, storageUsage }: Props) {
     return usage && usage.file_count > 0;
   });
 
-  // Handle Copy Uploaders
-  function handleCopyUploaders() {
+  // Build a map of userId -> user files
+  const userFilesMap = new Map<string, typeof allFiles>();
+  for (const file of allFiles) {
+    const existing = userFilesMap.get(file.owner_id) || [];
+    existing.push(file);
+    userFilesMap.set(file.owner_id, existing);
+  }
+
+  // Handle Extract Uploaders as CSV
+  function handleExtractUploaders() {
     if (uploaders.length === 0) {
       toast.error("No users have uploaded any files yet.");
       return;
     }
-    const names = uploaders.map((u) => u.full_name || "Unknown").join(", ");
-    navigator.clipboard.writeText(names);
-    toast.success(`Copied ${uploaders.length} uploader names to clipboard!`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setExporting(true);
+
+    try {
+      // CSV Header
+      const csvRows: string[] = ["User Name,File Name,File Size,Upload Date"];
+
+      // Sort uploaders alphabetically
+      const sortedUploaders = [...uploaders].sort((a, b) =>
+        (a.full_name || "").localeCompare(b.full_name || "")
+      );
+
+      for (const user of sortedUploaders) {
+        const files = userFilesMap.get(user.id) || [];
+        const userName = (user.full_name || "Unknown").replace(/,/g, " ");
+
+        if (files.length === 0) {
+          csvRows.push(`"${userName}","No files","",""`);
+        } else {
+          // Sort files by date (newest first)
+          const sortedFiles = [...files].sort(
+            (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          );
+          for (const file of sortedFiles) {
+            const fileName = file.name.replace(/"/g, '""');
+            const fileSize = formatSize(file.size_bytes);
+            const uploadDate = new Date(file.created_at).toLocaleString();
+            csvRows.push(`"${userName}","${fileName}","${fileSize}","${uploadDate}"`);
+          }
+        }
+      }
+
+      // Add BOM for Excel Arabic support + generate CSV
+      const bom = "\uFEFF";
+      const csvContent = bom + csvRows.join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `uploaders_report_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success(`CSV downloaded with ${uploaders.length} uploaders!`);
+    } catch {
+      toast.error("Failed to generate CSV file.");
+    } finally {
+      setExporting(false);
+    }
   }
 
   // Filter and Sort users
@@ -122,19 +176,16 @@ export function UsersTable({ users, storageUsage }: Props) {
             {onlyUploaders ? "Showing Uploaders Only" : "Show Uploaders Only"}
           </Button>
 
-          {/* Extract/Copy Uploaders Button */}
+          {/* Extract Uploaders CSV Button */}
           <Button
             variant="outline"
             size="sm"
-            onClick={handleCopyUploaders}
+            onClick={handleExtractUploaders}
+            disabled={exporting}
             className="border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800/50"
           >
-            {copied ? (
-              <Check className="h-4 w-4 mr-2 text-emerald-400" />
-            ) : (
-              <Copy className="h-4 w-4 mr-2 text-zinc-400" />
-            )}
-            Extract Uploaders ({uploaders.length})
+            <FileDown className="h-4 w-4 mr-2 text-zinc-400" />
+            {exporting ? "Exporting..." : `Extract Uploaders CSV (${uploaders.length})`}
           </Button>
         </div>
       </div>
