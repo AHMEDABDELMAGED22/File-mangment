@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { LogOut, Settings, Menu, Shield, LayoutDashboard, FolderOpen, Users, GraduationCap } from "lucide-react";
+import { LogOut, Settings, Menu, Shield, LayoutDashboard, FolderOpen, Users, GraduationCap, BrainCircuit } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface TopbarProps {
@@ -21,7 +21,7 @@ export function Topbar({ profile }: TopbarProps) {
     ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
-  const pageTitle = pathname.startsWith("/admin") ? "Admin" : pathname.startsWith("/settings") ? "Settings" : pathname.startsWith("/grades") ? "Your Grades" : pathname.startsWith("/workspace") ? "My Files" : "Dashboard";
+  const pageTitle = pathname.startsWith("/admin") ? "Admin" : pathname.startsWith("/settings") ? "Settings" : pathname.startsWith("/grades") ? "Your Grades" : pathname.startsWith("/quiz") ? "AI Quiz" : pathname.startsWith("/workspace") ? "My Files" : "Dashboard";
 
   return (
     <header className="h-16 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur-xl flex items-center justify-between px-4 md:px-6 sticky top-0 z-20">
@@ -45,6 +45,7 @@ export function Topbar({ profile }: TopbarProps) {
                 { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
                 { href: "/workspace", label: "My Files", icon: FolderOpen },
                 { href: "/grades", label: "Your Grades", icon: GraduationCap },
+                { href: "/quiz", label: "AI Quiz", icon: BrainCircuit },
                 ...(profile.role === "admin" ? [{ href: "/admin", label: "Admin", icon: Users }] : []),
                 { href: "/settings", label: "Settings", icon: Settings },
               ].map((item) => (
