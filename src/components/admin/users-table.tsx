@@ -58,6 +58,16 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
     userFilesMap.set(file.owner_id, existing);
   }
 
+  // Helper to normalize Arabic names for sorting
+  function normalizeForSort(text: string) {
+    return text
+      .trim()
+      .toLowerCase()
+      .replace(/[أإآ]/g, "ا")
+      .replace(/ة/g, "ه")
+      .replace(/ى/g, "ي");
+  }
+
   // Handle Extract Uploaders as CSV
   function handleExtractUploaders() {
     if (uploaders.length === 0) {
@@ -70,9 +80,9 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
       // CSV Header
       const csvRows: string[] = ["Student Code,User Name,File Name,File Size,Upload Date"];
 
-      // Sort uploaders alphabetically
+      // Sort uploaders alphabetically using normalized text
       const sortedUploaders = [...uploaders].sort((a, b) =>
-        (a.full_name || "").localeCompare(b.full_name || "")
+        normalizeForSort(a.full_name || "").localeCompare(normalizeForSort(b.full_name || ""), "ar")
       );
 
       for (const user of sortedUploaders) {
@@ -136,12 +146,13 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
     .sort((a, b) => {
       // 3. Alphabetical Sort
       if (sortOrder === "none") return 0;
-      const nameA = (a.full_name || "").toLowerCase();
-      const nameB = (b.full_name || "").toLowerCase();
+      const nameA = normalizeForSort(a.full_name || "");
+      const nameB = normalizeForSort(b.full_name || "");
+      
       if (sortOrder === "asc") {
-        return nameA.localeCompare(nameB);
+        return nameA.localeCompare(nameB, "ar");
       } else {
-        return nameB.localeCompare(nameA);
+        return nameB.localeCompare(nameA, "ar");
       }
     });
 
