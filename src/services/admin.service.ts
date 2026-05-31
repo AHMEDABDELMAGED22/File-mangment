@@ -47,3 +47,35 @@ export async function deleteUserAccount(targetUserId: string): Promise<void> {
     throw new Error(`Failed to delete user account: ${deleteError.message}`);
   }
 }
+
+/**
+ * Gets a system setting by key.
+ */
+export async function getSystemSetting(key: string): Promise<any> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("system_settings")
+    .select("value")
+    .eq("key", key)
+    .single();
+
+  if (error || !data) return null;
+  return data.value;
+}
+
+/**
+ * Updates a system setting. Requires admin privileges.
+ */
+export async function updateSystemSetting(key: string, value: any): Promise<boolean> {
+  const adminClient = createAdminClient();
+  
+  const { error } = await adminClient
+    .from("system_settings")
+    .upsert({ key, value, updated_at: new Date().toISOString() });
+    
+  if (error) {
+    console.error("Failed to update system setting:", error);
+    return false;
+  }
+  return true;
+}

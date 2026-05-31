@@ -76,3 +76,19 @@ export async function getAllUploadedFilesAction() {
   if (error) return { error: error.message };
   return { files: data };
 }
+
+export async function toggleSystemSettingAction(formData: FormData) {
+  await requireAdmin();
+  const key = formData.get("key") as string;
+  const value = formData.get("value") === "true";
+  
+  try {
+    const { updateSystemSetting } = await import("@/services/admin.service");
+    await updateSystemSetting(key, value);
+    revalidatePath("/admin");
+    revalidatePath("/grades"); // Revalidate grades page so students see changes immediately
+    return { success: true };
+  } catch (e: unknown) {
+    return { error: e instanceof Error ? e.message : "Failed to update setting" };
+  }
+}

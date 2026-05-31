@@ -32,20 +32,49 @@ export async function getUserGradeData(userId: string): Promise<UserGradeData | 
   // Then, get all their subject grades
   const { data: grades, error: gradesError } = await supabase
     .from("subject_grade_records")
-    .select("grade_part_1, grade_part_2, grade_part_3, grade_part_4, grade_subjects(slug, name)")
+    .select("subject_id, grade_part_1, grade_part_2, grade_part_3, grade_part_4, grade_subjects(slug, name)")
     .eq("student_code", link.student_code);
 
   if (gradesError) return null;
 
+  // Gracefully fetch setting (if table not migrated yet, it won't crash)
+  let showAverages = false;
+  try {
+    const { getSystemSetting } = await import("@/services/admin.service");
+    const val = await getSystemSetting("show_class_averages");
+    showAverages = val === "true" || val === true;
+  } catch (e) {
+    // Ignore
+  }
+
+  let averagesMap = new Map();
+  if (showAverages) {
+    try {
+      const { data: averages } = await supabase.rpc("get_subject_averages");
+      if (averages) {
+        averagesMap = new Map(averages.map((a: any) => [a.subject_id, a]));
+      }
+    } catch (e) {
+      // Ignore
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const subjects = (grades || []).map((g: any) => ({
-    subject_slug: g.grade_subjects.slug,
-    subject_name: g.grade_subjects.name,
-    grade_part_1: g.grade_part_1,
-    grade_part_2: g.grade_part_2,
-    grade_part_3: g.grade_part_3,
-    grade_part_4: g.grade_part_4,
-  }));
+  const subjects = (grades || []).map((g: any) => {
+    const avg = averagesMap.get(g.subject_id);
+    return {
+      subject_slug: g.grade_subjects.slug,
+      subject_name: g.grade_subjects.name,
+      grade_part_1: g.grade_part_1,
+      grade_part_2: g.grade_part_2,
+      grade_part_3: g.grade_part_3,
+      grade_part_4: g.grade_part_4,
+      avg_part_1: avg ? avg.avg_part_1 : null,
+      avg_part_2: avg ? avg.avg_part_2 : null,
+      avg_part_3: avg ? avg.avg_part_3 : null,
+      avg_part_4: avg ? avg.avg_part_4 : null,
+    };
+  });
 
   return {
     student_code: student.student_code,

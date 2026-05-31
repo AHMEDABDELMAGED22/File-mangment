@@ -15,6 +15,8 @@ import { getAllSubjectsAction } from "@/actions/grade.actions";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { UsersTable } from "@/components/admin/users-table";
+import { SystemSettingToggle } from "@/components/admin/system-setting-toggle";
+import { getSystemSetting } from "@/services/admin.service";
 
 function formatSize(bytes: number) {
   if (bytes === 0) return "0 B";
@@ -37,12 +39,13 @@ function formatAction(action: string) {
 export default async function AdminPage() {
   await requireAdmin();
 
-  const [usersResult, activityResult, storageUsage, subjectsResult, filesResult] = await Promise.all([
+  const [usersResult, activityResult, storageUsage, subjectsResult, filesResult, showClassAveragesSetting] = await Promise.all([
     getAllUsersAction(),
     getAllActivityAction(50),
     getStorageUsageByUser(),
     getAllSubjectsAction(),
     getAllUploadedFilesAction(),
+    getSystemSetting("show_class_averages").catch(() => false), // graceful fallback
   ]);
 
   const users = usersResult.users || [];
@@ -50,6 +53,7 @@ export default async function AdminPage() {
   const subjects = subjectsResult.subjects || [];
   const storageMap = new Map(storageUsage.map((s) => [s.user_id, s]));
   const allFiles = filesResult.files || [];
+  const showClassAverages = showClassAveragesSetting === "true" || showClassAveragesSetting === true;
 
   return (
     <div className="space-y-6">
@@ -101,6 +105,7 @@ export default async function AdminPage() {
           <TabsTrigger value="users" className="data-[state=active]:bg-zinc-700 data-[state=active]:text-white">Users</TabsTrigger>
           <TabsTrigger value="activity" className="data-[state=active]:bg-zinc-700 data-[state=active]:text-white">Activity Log</TabsTrigger>
           <TabsTrigger value="grades" className="data-[state=active]:bg-zinc-700 data-[state=active]:text-white">Grades</TabsTrigger>
+          <TabsTrigger value="settings" className="data-[state=active]:bg-zinc-700 data-[state=active]:text-white">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="users">
@@ -177,6 +182,23 @@ export default async function AdminPage() {
                 </Table>
               </CardContent>
             </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="settings">
+          <div className="space-y-6 max-w-2xl">
+            <div>
+              <h2 className="text-lg font-semibold text-white">System Settings</h2>
+              <p className="text-sm text-zinc-400">Manage global features and configurations.</p>
+            </div>
+            <div className="grid gap-4">
+              <SystemSettingToggle
+                settingKey="show_class_averages"
+                initialValue={showClassAverages}
+                title="Show Class Averages to Students"
+                description="When enabled, students will see the cohort average next to their score in each assessment."
+              />
+            </div>
           </div>
         </TabsContent>
       </Tabs>

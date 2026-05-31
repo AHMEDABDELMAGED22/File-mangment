@@ -71,27 +71,47 @@ export default async function GradesPage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/40 border border-zinc-800">
                       <span className="text-sm font-medium text-zinc-400">Oral</span>
-                      <span className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
-                        {subject.grade_part_1 || "N/A"}
-                      </span>
+                      <div className="text-right">
+                        <div className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                          {subject.grade_part_1 || "N/A"}
+                        </div>
+                        {subject.avg_part_1 != null && subject.grade_part_1 !== "(لم تظهر بعد)" && (
+                          <div className="text-xs text-zinc-500 mt-0.5">(Avg: {subject.avg_part_1})</div>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/40 border border-zinc-800">
                       <span className="text-sm font-medium text-zinc-400">Midterm</span>
-                      <span className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
-                        {subject.grade_part_2 || "N/A"}
-                      </span>
+                      <div className="text-right">
+                        <div className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                          {subject.grade_part_2 || "N/A"}
+                        </div>
+                        {subject.avg_part_2 != null && subject.grade_part_2 !== "(لم تظهر بعد)" && (
+                          <div className="text-xs text-zinc-500 mt-0.5">(Avg: {subject.avg_part_2})</div>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/40 border border-zinc-800">
                       <span className="text-sm font-medium text-zinc-400">Practical</span>
-                      <span className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
-                        {subject.grade_part_3 || "N/A"}
-                      </span>
+                      <div className="text-right">
+                        <div className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                          {subject.grade_part_3 || "N/A"}
+                        </div>
+                        {subject.avg_part_3 != null && subject.grade_part_3 !== "(لم تظهر بعد)" && (
+                          <div className="text-xs text-zinc-500 mt-0.5">(Avg: {subject.avg_part_3})</div>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-800/40 border border-zinc-800">
                       <span className="text-sm font-medium text-zinc-400">Coursework</span>
-                      <span className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
-                        {subject.grade_part_4 || "N/A"}
-                      </span>
+                      <div className="text-right">
+                        <div className={`text-xl font-bold ${index % 2 === 0 ? "text-amber-400" : "text-emerald-400"}`}>
+                          {subject.grade_part_4 || "N/A"}
+                        </div>
+                        {subject.avg_part_4 != null && subject.grade_part_4 !== "(لم تظهر بعد)" && (
+                          <div className="text-xs text-zinc-500 mt-0.5">(Avg: {subject.avg_part_4})</div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>

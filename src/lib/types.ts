@@ -111,10 +111,20 @@ export interface UserSubjectGrade {
   grade_part_2: string | null;
   grade_part_3: string | null;
   grade_part_4: string | null;
+  avg_part_1?: number | null;
+  avg_part_2?: number | null;
+  avg_part_3?: number | null;
+  avg_part_4?: number | null;
 }
 
 export interface UserGradeData {
   student_code: string;
   canonical_name: string;
   subjects: UserSubjectGrade[];
+}
+
+export interface SystemSettings {
+  key: string;
+  value: any;
+  updated_at: string;
 }
