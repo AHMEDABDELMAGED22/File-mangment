@@ -87,16 +87,12 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
           const sortedFiles = [...files].sort(
             (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
           );
-          let isFirst = true;
-          for (const file of sortedFiles) {
-            const fileName = file.name.replace(/"/g, '""');
-            const fileSize = formatSize(file.size_bytes);
-            const uploadDate = new Date(file.created_at).toLocaleString();
-            const currentCode = isFirst ? studentCode : "";
-            const currentName = isFirst ? userName : "";
-            csvRows.push(`"${currentCode}","${currentName}","${fileName}","${fileSize}","${uploadDate}"`);
-            isFirst = false;
-          }
+          
+          const fileNames = sortedFiles.map(f => f.name.replace(/"/g, '""')).join(",\n");
+          const fileSizes = sortedFiles.map(f => formatSize(f.size_bytes)).join(",\n");
+          const uploadDates = sortedFiles.map(f => new Date(f.created_at).toLocaleString()).join(",\n");
+          
+          csvRows.push(`"${studentCode}","${userName}","${fileNames}","${fileSizes}","${uploadDates}"`);
         }
       }
 
