@@ -13,9 +13,10 @@ import { cn } from "@/lib/utils";
 
 interface TopbarProps {
   profile: Profile;
+  workspaceId: string;
 }
 
-export function Topbar({ profile }: TopbarProps) {
+export function Topbar({ profile, workspaceId }: TopbarProps) {
   const pathname = usePathname();
   const initials = profile.full_name
     ? profile.full_name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
@@ -43,7 +44,7 @@ export function Topbar({ profile }: TopbarProps) {
             <nav className="py-4 px-2 space-y-1">
               {[
                 { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-                { href: "/workspace", label: "My Files", icon: FolderOpen },
+                { href: `/workspace/${workspaceId}`, label: "My Files", icon: FolderOpen },
                 { href: "/grades", label: "Your Grades", icon: GraduationCap },
                 { href: "/quiz", label: "AI Quiz", icon: BrainCircuit },
                 ...(profile.role === "admin" ? [{ href: "/admin", label: "Admin", icon: Users }] : []),

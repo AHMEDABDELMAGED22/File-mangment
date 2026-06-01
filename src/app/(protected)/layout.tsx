@@ -11,7 +11,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
     <div className="min-h-screen bg-zinc-950 flex">
       <Sidebar profile={profile} workspaceId={workspace?.id || ""} />
       <div className="flex-1 flex flex-col min-h-screen lg:ml-64">
-        <Topbar profile={profile} />
+        <Topbar profile={profile} workspaceId={workspace?.id || ""} />
         <main className="flex-1 overflow-y-auto bg-zinc-950 p-4 sm:p-6 pb-20">
           {children}
         </main>
