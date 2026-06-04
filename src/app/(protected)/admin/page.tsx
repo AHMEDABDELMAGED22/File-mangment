@@ -6,16 +6,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Users, FolderOpen, Activity, ExternalLink, GraduationCap } from "lucide-react";
+import { Users, FolderOpen, Activity, ExternalLink, GraduationCap, BarChart3 } from "lucide-react";
 import { ToggleActiveButton } from "@/components/admin/toggle-active-button";
 import { DeleteUserButton } from "@/components/admin/delete-user-button";
 import { GradeCsvImport } from "@/components/admin/grade-import";
 import { DeleteSubjectButton } from "@/components/admin/delete-subject-button";
 import { getAllSubjectsAction } from "@/actions/grade.actions";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { UsersTable } from "@/components/admin/users-table";
 import { SystemSettingToggle } from "@/components/admin/system-setting-toggle";
+import { cn } from "@/lib/utils";
+
 import { getSystemSetting } from "@/services/admin.service";
 
 function formatSize(bytes: number) {
@@ -57,10 +59,23 @@ export default async function AdminPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
-        <p className="text-zinc-400 text-sm mt-1">Manage users, workspaces, and view activity</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Admin Panel</h1>
+          <p className="text-zinc-400 text-sm mt-1">Manage users, workspaces, and view activity</p>
+        </div>
+        <Link
+          href="/admin/analytics"
+          className={cn(
+            buttonVariants({ variant: "default" }),
+            "bg-violet-600 hover:bg-violet-700 text-white shrink-0 shadow-lg shadow-violet-600/10"
+          )}
+        >
+          <BarChart3 className="h-4 w-4" />
+          Analytics Dashboard
+        </Link>
       </div>
+
 
       {/* Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
