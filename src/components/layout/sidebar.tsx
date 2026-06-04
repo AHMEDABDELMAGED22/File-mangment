@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import type { Profile } from "@/lib/types";
-import { Shield, LayoutDashboard, FolderOpen, Settings, Users, ChevronLeft, ChevronRight, GraduationCap, BrainCircuit } from "lucide-react";
+import { Shield, LayoutDashboard, FolderOpen, Settings, Users, ChevronLeft, ChevronRight, GraduationCap, BrainCircuit, BarChart3 } from "lucide-react";
 import { useState } from "react";
 
 interface SidebarProps {
@@ -22,6 +22,7 @@ const getNavItems = (workspaceId: string, isAdmin: boolean) => {
   ];
   if (isAdmin) {
     items.splice(4, 0, { href: "/admin", label: "Admin", icon: Users });
+    items.splice(5, 0, { href: "/admin/analytics", label: "Analytics", icon: BarChart3 });
   }
   return items;
 };
@@ -53,7 +54,9 @@ export function Sidebar({ profile, workspaceId }: SidebarProps) {
         {/* Navigation */}
         <nav className="flex-1 py-4 px-2 space-y-1">
           {navItems.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+            const isActive = item.href === "/admin"
+              ? pathname === "/admin"
+              : pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <Link
                 key={item.href}

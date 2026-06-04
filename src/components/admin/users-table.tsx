@@ -17,7 +17,8 @@ import {
   Check, 
   Users, 
   HardDriveUpload, 
-  ExternalLink 
+  ExternalLink,
+  FileX 
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -41,6 +42,7 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
   const [sortOrder, setSortOrder] = useState<"asc" | "desc" | "none">("asc"); // Default to alphabetical A-Z
   const [onlyUploaders, setOnlyUploaders] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [exportingNon, setExportingNon] = useState(false);
 
   const storageMap = new Map(storageUsage.map((s) => [s.user_id, s]));
 
@@ -48,6 +50,12 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
   const uploaders = users.filter((user) => {
     const usage = storageMap.get(user.id);
     return usage && usage.file_count > 0;
+  });
+
+  // Extract all non-uploaders (users with zero files)
+  const nonUploaders = users.filter((user) => {
+    const usage = storageMap.get(user.id);
+    return !usage || usage.file_count === 0;
   });
 
   // Build a map of userId -> user files
@@ -127,6 +135,54 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
     }
   }
 
+  // Handle Extract Non-Uploaders as CSV
+  function handleExtractNonUploaders() {
+    if (nonUploaders.length === 0) {
+      toast.error("All users have uploaded files.");
+      return;
+    }
+    setExportingNon(true);
+
+    try {
+      // CSV Header
+      const csvRows: string[] = ["Student Code,User Name,Role,Status,Joined"];
+
+      // Sort non-uploaders alphabetically using normalized text
+      const sortedNonUploaders = [...nonUploaders].sort((a, b) =>
+        normalizeForSort(a.full_name || "").localeCompare(normalizeForSort(b.full_name || ""), "ar")
+      );
+
+      for (const user of sortedNonUploaders) {
+        const userName = (user.full_name || "Unknown").replace(/,/g, " ");
+        const studentCode = (user.student_code || "—").replace(/,/g, " ");
+        const role = user.role || "user";
+        const status = user.is_active ? "Active" : "Inactive";
+        const joined = new Date(user.created_at).toLocaleDateString();
+
+        csvRows.push(`"${studentCode}","${userName}","${role}","${status}","${joined}"`);
+      }
+
+      // Add BOM for Excel Arabic support + generate CSV
+      const bom = "\uFEFF";
+      const csvContent = bom + csvRows.join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `non_uploaders_report_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast.success(`CSV downloaded with ${nonUploaders.length} non-uploaders!`);
+    } catch {
+      toast.error("Failed to generate CSV file.");
+    } finally {
+      setExportingNon(false);
+    }
+  }
+
   // Filter and Sort users
   const filteredUsers = users
     .filter((user) => {
@@ -199,6 +255,18 @@ export function UsersTable({ users, storageUsage, allFiles }: Props) {
           >
             <FileDown className="h-4 w-4 mr-2 text-zinc-400" />
             {exporting ? "Exporting..." : `Extract Uploaders CSV (${uploaders.length})`}
+          </Button>
+
+          {/* Extract Non-Uploaders CSV Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExtractNonUploaders}
+            disabled={exportingNon}
+            className="border-zinc-800 text-zinc-300 hover:text-white hover:bg-zinc-800/50"
+          >
+            <FileX className="h-4 w-4 mr-2 text-rose-400" />
+            {exportingNon ? "Exporting..." : `Non-Uploaders CSV (${nonUploaders.length})`}
           </Button>
         </div>
       </div>

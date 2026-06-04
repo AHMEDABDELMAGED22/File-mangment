@@ -53,6 +53,7 @@ export const ROUTES = {
   FOLDER: (workspaceId: string, folderId: string) =>
     `/workspace/${workspaceId}/folder/${folderId}`,
   ADMIN: "/admin",
+  ANALYTICS: "/admin/analytics",
   SETTINGS: "/settings",
   GRADES: "/grades",
 } as const;
