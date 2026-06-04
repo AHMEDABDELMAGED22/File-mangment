@@ -128,3 +128,52 @@ export interface SystemSettings {
   value: any;
   updated_at: string;
 }
+
+// ─── Analytics Dashboard Types ───────────────────────────────
+
+export interface AnalyticsOverview {
+  totalStudents: number;
+  totalGradesRecorded: number;
+  totalSubjects: number;
+  averageScore: number;
+  highestTotal: number;
+  lowestTotal: number;
+  highestTotalStudentName: string;
+  lowestTotalStudentName: string;
+}
+
+export interface StudentRanking {
+  studentCode: string;
+  studentName: string;
+  totalScore: number;
+  averageScore: number;
+  subjectCount: number;
+  rank: number;
+}
+
+export interface SubjectAnalytics {
+  subjectId: string;
+  subjectName: string;
+  subjectSlug: string;
+  studentCount: number;
+  averageTotal: number;
+  highestTotal: number;
+  lowestTotal: number;
+  avgPart1: number | null;
+  avgPart2: number | null;
+  avgPart3: number | null;
+  avgPart4: number | null;
+}
+
+export interface GradeDistributionBucket {
+  label: string;
+  count: number;
+  color: string;
+}
+
+export interface AnalyticsDashboardData {
+  overview: AnalyticsOverview;
+  rankings: StudentRanking[];
+  subjectStats: SubjectAnalytics[];
+  gradeDistribution: GradeDistributionBucket[];
+}
