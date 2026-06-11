@@ -19,9 +19,10 @@ const getNavItems = (workspaceId: string, isAdmin: boolean) => {
     { href: "/grades", label: "Your Grades", icon: GraduationCap },
     { href: "/quiz", label: "AI Quiz", icon: BrainCircuit },
     { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/about-developer", label: "About Developer", icon: Users },
   ];
   if (isAdmin) {
-    items.splice(4, 0, { href: "/admin", label: "Admin", icon: Users });
+    items.splice(4, 0, { href: "/admin", label: "Admin", icon: Shield });
     items.splice(5, 0, { href: "/admin/analytics", label: "Analytics", icon: BarChart3 });
   }
   return items;

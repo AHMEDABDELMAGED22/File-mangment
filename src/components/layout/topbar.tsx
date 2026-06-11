@@ -34,6 +34,8 @@ export function Topbar({ profile, workspaceId }: TopbarProps) {
     ? "AI Quiz"
     : pathname.startsWith("/workspace")
     ? "My Files"
+    : pathname.startsWith("/about-developer")
+    ? "About Developer"
     : "Dashboard";
 
   return (
@@ -66,6 +68,7 @@ export function Topbar({ profile, workspaceId }: TopbarProps) {
                     ]
                   : []),
                 { href: "/settings", label: "Settings", icon: Settings },
+                { href: "/about-developer", label: "About Developer", icon: Users },
               ].map((item) => {
                 const isActive = item.href === "/admin"
                   ? pathname === "/admin"
