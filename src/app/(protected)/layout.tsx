@@ -17,7 +17,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
         </main>
         <footer className="fixed bottom-0 right-0 left-0 sm:left-64 h-10 bg-zinc-950/80 backdrop-blur-md border-t border-zinc-900 flex items-center justify-center z-10">
           <p className="text-zinc-500 text-[10px] sm:text-xs font-medium tracking-wider uppercase">
-            Made by <span className="text-zinc-300">Ahmed AbdElmaged</span>
+            Made by <a href="https://www.linkedin.com/in/ahmed-mohamed-039278231/" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300 hover:underline transition-colors">Ahmed AbdElmaged</a>
           </p>
         </footer>
       </div>
