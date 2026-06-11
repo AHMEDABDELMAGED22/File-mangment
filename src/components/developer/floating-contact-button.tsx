@@ -40,10 +40,10 @@ export function FloatingContactButton() {
   }, [open]);
 
   return (
-    <div className="fixed bottom-16 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end" ref={menuRef}>
+    <div className="fixed bottom-16 right-4 sm:bottom-6 sm:right-6 z-50" ref={menuRef}>
       {/* Contact Popup Menu */}
       <div 
-        className={`mb-4 w-64 bg-zinc-900/90 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 origin-bottom-right ${
+        className={`absolute bottom-full right-0 mb-4 w-64 bg-zinc-900/90 backdrop-blur-xl border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 origin-bottom-right ${
           open ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-4 pointer-events-none"
         }`}
       >
