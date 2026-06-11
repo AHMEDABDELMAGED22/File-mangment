@@ -48,8 +48,10 @@ export function FloatingContactButton() {
         }`}
       >
         <div className="p-4 border-b border-zinc-800/50">
-          <h3 className="text-sm font-semibold text-white">Quick Contact</h3>
-          <p className="text-xs text-zinc-400 mt-1">Get in touch directly</p>
+          <h3 className="text-sm font-semibold text-white">Quick contact with the developer</h3>
+          <p className="text-xs text-zinc-400 mt-1">
+            and (Made by <a href="https://www.linkedin.com/in/ahmed-mohamed-039278231/" target="_blank" rel="noopener noreferrer" className="text-violet-400 hover:text-violet-300 hover:underline transition-colors">Ahmed AbdElmaged</a>)
+          </p>
         </div>
         
         <div className="p-2 flex flex-col gap-1">
