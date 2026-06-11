@@ -128,3 +128,14 @@
     @apply font-sans;
   }
 }
+
+@keyframes contact-pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
