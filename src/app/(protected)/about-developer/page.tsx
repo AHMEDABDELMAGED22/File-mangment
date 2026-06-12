@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Mail,
@@ -91,6 +91,7 @@ export default function AboutDeveloperPage() {
           <div className="relative shrink-0">
             <div className="absolute -inset-1.5 rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 opacity-60 blur-md" />
             <Avatar className="relative h-32 w-32 md:h-40 md:w-40 border-2 border-zinc-700 ring-4 ring-violet-500/20">
+              <AvatarImage src="/developer-avatar.jpeg" alt={DEVELOPER.name} className="object-cover" />
               <AvatarFallback className="bg-gradient-to-br from-violet-500 to-indigo-600 text-white text-4xl md:text-5xl font-bold">
                 {DEVELOPER.initials}
               </AvatarFallback>
