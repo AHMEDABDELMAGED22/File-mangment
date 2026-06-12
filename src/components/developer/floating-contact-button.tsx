@@ -47,7 +47,7 @@ export function FloatingContactButton() {
           open ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 translate-y-4 pointer-events-none"
         }`}
       >
-        <div className="p-4 border-b border-zinc-800/50">
+        <div className="p-4 border-b border-zinc-800/50 text-center">
           <h3 className="text-sm font-semibold text-white">Quick contact with the developer</h3>
         </div>
         
