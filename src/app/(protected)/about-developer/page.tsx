@@ -96,9 +96,6 @@ export default function AboutDeveloperPage() {
                 {DEVELOPER.initials}
               </AvatarFallback>
             </Avatar>
-
-              <Check className="h-3 w-3 text-white" />
-            </div>
           </div>
 
           <div className="space-y-4 max-w-2xl">
