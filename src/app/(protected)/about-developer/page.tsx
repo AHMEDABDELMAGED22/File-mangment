@@ -37,7 +37,7 @@ function GithubIcon({ className }: { className?: string }) {
 const DEVELOPER = {
   name: "Ahmed Mohamed Ahmed",
   initials: "AM",
-  title: "Frontend Developer | React Developer | UI Builder | Backend Developer",
+  title: "Software Engineer",
   bio: "I am a results-driven developer focused on building scalable, responsive, and user-centered web experiences using modern technologies. I have hands-on experience through the Digital Egypt Pioneers Initiative, freelance React projects, competitive programming at ICPC Minya University, and real-world project work. I also work on backend development using Supabase and Node.js to build full-stack solutions.",
   location: "Minia, Egypt",
   email: "ahmedmohummed22@gmail.com",
@@ -96,7 +96,7 @@ export default function AboutDeveloperPage() {
                 {DEVELOPER.initials}
               </AvatarFallback>
             </Avatar>
-            <div className="absolute bottom-1 right-1 h-6 w-6 rounded-full bg-emerald-500 border-4 border-zinc-900 flex items-center justify-center" title="Available for work">
+
               <Check className="h-3 w-3 text-white" />
             </div>
           </div>
